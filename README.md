@@ -1,0 +1,1 @@
+# qubership-logging-operator
