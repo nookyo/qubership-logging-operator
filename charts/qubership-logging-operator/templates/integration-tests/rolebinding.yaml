@@ -1,0 +1,28 @@
+{{- if .Values.integrationTests.install }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.integrationTests.service.name }}
+  labels:
+    name: {{ .Values.integrationTests.service.name }}
+    app.kubernetes.io/name: {{ .Values.integrationTests.service.name }}
+    app.kubernetes.io/instance: {{ cat .Values.integrationTests.service.name "-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: integration-tests
+    app.kubernetes.io/part-of: logging
+    {{- $image := include "logging-integration-tests.image" . }}
+    app.kubernetes.io/version: {{ splitList ":" $image | last }}
+  {{- if .Values.integrationTests.labels }}
+    {{- toYaml .Values.integrationTests.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.integrationTests.annotations }}
+  annotations:
+    {{- toYaml .Values.integrationTests.annotations | nindent 4 }}
+  {{- end }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.integrationTests.service.name }}
+roleRef:
+  kind: Role
+  name: {{ .Values.integrationTests.service.name }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}

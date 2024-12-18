@@ -1,0 +1,19 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+graylog:
+  install: true
+
+  host: graylog.kubernetes.test.org
+  elasticsearchHost: http://<username>:<password>@opensearch.opensearch.svc:9200
+
+  graylogStorageClassName: nginx
+  storageSize: 10Gi
+
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1500Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi

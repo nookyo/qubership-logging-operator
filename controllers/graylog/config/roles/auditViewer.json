@@ -1,0 +1,13 @@
+{
+   "name":"AuditViewer",
+   "description":"Role for viewing audit logs",
+   "permissions":[
+      "streams:read:{{ .allEventsStreamId }}",
+      "streams:read:{{ .defaultStreamId }}",
+      "streams:read:{{ .allSystemEventsStreamId }}",
+      "streams:read:{{ .systemLogsStreamId }}",
+      "streams:read:{{ .auditLogsStreamId }}",
+      "dashboards:read:{{ .sourcesDashboardId }}"
+   ],
+   "read_only":true
+}

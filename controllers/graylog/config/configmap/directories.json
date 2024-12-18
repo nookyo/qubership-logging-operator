@@ -1,0 +1,4 @@
+{
+  "graylog": "/usr/share/elasticsearch/snapshots/graylog/graylog",
+  "gray_audit": "/usr/share/elasticsearch/snapshots/graylog/gray_audit"
+}

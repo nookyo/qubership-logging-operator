@@ -1,0 +1,12 @@
+{
+   "name":"Operator",
+   "description":"Default operator role",
+   "permissions":[
+      "streams:read:{{ .allEventsStreamId }}",
+      "streams:read:{{ .defaultStreamId }}",
+      "streams:read:{{ .allSystemEventsStreamId }}",
+      "streams:read:{{ .systemLogsStreamId }}",
+      "dashboards:read:{{ .sourcesDashboardId }}"
+   ],
+   "read_only":true
+}

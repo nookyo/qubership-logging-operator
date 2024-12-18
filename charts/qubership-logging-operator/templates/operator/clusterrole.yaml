@@ -1,0 +1,27 @@
+{{- if .Values.createClusterAdminEntities }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logging-service-operator
+  labels:
+    app.kubernetes.io/name: logging-service-operator
+    app.kubernetes.io/component: logging-operator
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.labels }}
+    {{- toYaml .Values.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+rules:
+  # Need to get list of nodes and them runtimes to discover which runtime type should use
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - get
+      - list
+      - watch
+{{- end }}

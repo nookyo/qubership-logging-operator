@@ -1,0 +1,21 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+fluentd:
+  install: true
+
+  # Disable Graylog output
+  graylogOutput: false
+
+  customOutputConf: |-
+    <store ignore_error>
+      custom_output_configuration
+    </store>
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

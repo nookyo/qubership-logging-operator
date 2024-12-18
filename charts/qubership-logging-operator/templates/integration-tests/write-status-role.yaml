@@ -1,0 +1,27 @@
+{{- if .Values.integrationTests.install }}
+{{- if .Values.integrationTests.statusWriting.enabled }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: logging-operator-tests-write-status
+  labels:
+    app.kubernetes.io/name: logging-operator-tests-write-status
+    app.kubernetes.io/component: integration-tests
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.integrationTests.labels }}
+    {{- toYaml .Values.integrationTests.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.integrationTests.annotations }}
+  annotations:
+    {{- toYaml .Values.integrationTests.annotations | nindent 4 }}
+  {{- end }}
+rules:
+- apiGroups:
+  - {{ template "integrationTests.apigroup_custom_resource" . }}
+  resources:
+  - {{ template "integrationTests.plural_custom_resource" . }}/status
+  verbs:
+  - get
+  - patch
+{{- end }}
+{{- end }}

@@ -1,0 +1,341 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: logging-fluentd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: logging-fluentd
+    app.kubernetes.io/name: logging-fluentd
+    app.kubernetes.io/component: fluentd
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+    component: logging-fluentd
+{{- if .Values.OpenshiftDeploy }}
+    provider: openshift
+{{- else }}
+    provider: kubernetes
+{{- end }}
+spec:
+  minReadySeconds: 60
+  selector:
+    matchLabels:
+      component: logging-fluentd
+{{- if .Values.OpenshiftDeploy }}
+      provider: openshift
+{{- else }}
+      provider: kubernetes
+{{- end }}
+  template:
+    metadata:
+      name: logging-fluentd
+      labels:
+        name: logging-fluentd
+        app.kubernetes.io/name: logging-fluentd
+        app.kubernetes.io/component: fluentd
+        app.kubernetes.io/part-of: logging
+        app.kubernetes.io/managed-by: logging-operator
+        component: logging-fluentd
+{{- if .Values.OpenshiftDeploy }}
+        provider: openshift
+{{- else }}
+        provider: kubernetes
+{{- end }}
+    spec:
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: logging-fluentd
+      containers:
+        - name: configmap-reload
+          image: {{ .Values.Fluentd.ConfigmapReload.DockerImage }}
+          args:
+            - --volume-dir=/fluentd/etc
+            - --webhook-url=http://localhost:24444/api/config.reload
+          volumeMounts:
+            - mountPath: /fluentd/etc
+              name: config
+              readOnly: true
+          {{- if .Values.Fluentd.ConfigmapReload.Resources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Fluentd.ConfigmapReload.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Fluentd.ConfigmapReload.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Fluentd.ConfigmapReload.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Fluentd.ConfigmapReload.Resources.Requests "memory" }}
+          {{- end }}
+          ports:
+            - containerPort: 9533
+              name: metrics
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+        - name: logging-fluentd
+          image: {{ .Values.Fluentd.DockerImage }}
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: {{ .Values.Fluentd.SecurityContextPrivileged }}
+          ports:
+            - containerPort: 24220
+              name: http
+              protocol: TCP
+            - containerPort: 24232
+              protocol: TCP
+              name: metrics
+          livenessProbe:
+            httpGet:
+              path: /api/plugins.json
+              port: 24220
+              scheme: HTTP
+            initialDelaySeconds: 90
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/plugins.json
+              port: 24220
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+{{- if .Values.Fluentd.Resources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Fluentd.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Fluentd.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Fluentd.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Fluentd.Resources.Requests "memory" }}
+{{- end }}
+          env:
+            - name: K8S_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+{{- if .Values.Fluentd.GraylogOutput }}
+            - name: GRAYLOG_HOST
+              value: {{ .Values.Fluentd.GraylogHost }}
+            - name: GRAYLOG_PORT
+              value: {{ .Values.Fluentd.GraylogPort }}
+            - name: GRAYLOG_PROTOCOL
+              value: {{ default "tcp" .Values.Fluentd.GraylogProtocol }}
+{{- end }}
+            - name: QUEUE_LIMIT_LENGTH
+              value: {{ default 5000 .Values.Fluentd.QueueLimitLength }}
+            - name: WATCH_KUBERNETES_METADATA
+              {{- if .Values.Fluentd.WatchKubernetesMetadata }}
+              value: {{ .Values.Fluentd.WatchKubernetesMetadata | quote }}
+              {{- else }}
+              value: "true"
+              {{- end }}
+            - name: MA_HOST
+              value: {{ if .Values.Ipv6 }} '::' {{ else }} '0.0.0.0' {{ end }}
+            - name: RUBY_GC_HEAP_OLDOBJECT_LIMIT_FACTOR
+              value: '1.2'
+            - name: RUBY_GC_MALLOC_LIMIT
+              value: '4194304'
+            - name: RUBY_GC_MALLOC_LIMIT_MAX
+              value: '16777216'
+            - name: RUBY_GC_OLDMALLOC_LIMIT
+              value: '16777216'
+            - name: RUBY_GC_OLDMALLOC_LIMIT_MAX
+              value: '16777216'
+{{- if and .Values.Fluentd.Output .Values.Fluentd.Output.Loki .Values.Fluentd.Output.Loki.Enabled }}
+{{- if and .Values.Fluentd.Output.Loki.Auth .Values.Fluentd.Output.Loki.Auth.User .Values.Fluentd.Output.Loki.Auth.User.Name .Values.Fluentd.Output.Loki.Auth.User.Key .Values.Fluentd.Output.Loki.Auth.Password .Values.Fluentd.Output.Loki.Auth.Password.Name .Values.Fluentd.Output.Loki.Auth.Password.Key }}
+            - name: LOKI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentd.Output.Loki.Auth.User.Name }}
+                  key: {{ .Values.Fluentd.Output.Loki.Auth.User.Key }}
+            - name: LOKI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentd.Output.Loki.Auth.Password.Name }}
+                  key: {{ .Values.Fluentd.Output.Loki.Auth.Password.Key }}
+{{- end }}
+{{- end }}
+          volumeMounts:
+{{ if eq .Values.ContainerRuntimeType "docker" }}
+{{ if ne .Values.OSKind "ubuntu" }}
+            - mountPath: /etc/sysconfig/docker
+              name: sysconfigdocker
+              readOnly: true
+{{ end }}
+            - mountPath: /etc/docker/daemon.json
+              name: dockerdaemon
+              readOnly: true
+            - mountPath: /etc/docker-hostname
+              name: dockerhostname
+              readOnly: true
+            - mountPath: /var/lib/docker/containers
+              name: varlibdockercontainers
+              readOnly: true
+{{ end }}
+            - mountPath: /var/log
+              name: varlog
+            - mountPath: /fluentd/etc
+              name: config
+              readOnly: true
+{{ if .Values.Fluentd.TLS }}
+{{ if and .Values.Fluentd.TLS.GenerateCerts .Values.Fluentd.TLS.GenerateCerts.Enabled }}
+            - mountPath: /fluentd/tls/ca.crt
+              name: tls-ca
+              readOnly: true
+              subPath: "ca.crt"
+            - mountPath: /fluentd/tls/tls.crt
+              name: tls-cert
+              readOnly: true
+              subPath: "tls.crt"
+            - mountPath: /fluentd/tls/tls.key
+              name: tls-key
+              readOnly: true
+              subPath: "tls.key"
+{{ else }}
+{{ if and .Values.Fluentd.TLS.CA .Values.Fluentd.TLS.CA.SecretName .Values.Fluentd.TLS.CA.SecretKey }}
+            - mountPath: /fluentd/tls/ca.crt
+              name: tls-ca
+              readOnly: true
+              subPath: {{ .Values.Fluentd.TLS.CA.SecretKey }}
+{{ end }}
+{{ if and .Values.Fluentd.TLS.Cert .Values.Fluentd.TLS.Cert.SecretName .Values.Fluentd.TLS.Cert.SecretKey }}
+            - mountPath: /fluentd/tls/tls.crt
+              name: tls-cert
+              readOnly: true
+              subPath: {{ .Values.Fluentd.TLS.Cert.SecretKey }}
+{{ end }}
+{{ if and .Values.Fluentd.TLS.Key .Values.Fluentd.TLS.Key.SecretName .Values.Fluentd.TLS.Key.SecretKey }}
+            - mountPath: /fluentd/tls/tls.key
+              name: tls-key
+              readOnly: true
+              subPath: {{ .Values.Fluentd.TLS.Key.SecretKey }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{- if and .Values.Fluentd.Output .Values.Fluentd.Output.Loki .Values.Fluentd.Output.Loki.Enabled }}
+{{- if and .Values.Fluentd.Output.Loki.Auth .Values.Fluentd.Output.Loki.Auth.Token .Values.Fluentd.Output.Loki.Auth.Token.Name .Values.Fluentd.Output.Loki.Auth.Token.Key }}
+            - mountPath: /fluentd/output/loki/auth/token
+              name: loki-auth-token
+              readOnly: true
+              subPath: {{ .Values.Fluentd.Output.Loki.Auth.Token.Key }}
+{{- end }}
+{{- if and .Values.Fluentd.Output.Loki.TLS .Values.Fluentd.Output.Loki.TLS.Enabled }}
+{{- if and .Values.Fluentd.Output.Loki.TLS.CA .Values.Fluentd.Output.Loki.TLS.CA.SecretName .Values.Fluentd.Output.Loki.TLS.CA.SecretKey }}
+            - mountPath: /fluentd/output/loki/tls/ca.crt
+              name: loki-tls-ca
+              readOnly: true
+              subPath: {{ .Values.Fluentd.Output.Loki.TLS.CA.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentd.Output.Loki.TLS.Cert .Values.Fluentd.Output.Loki.TLS.Cert.SecretName .Values.Fluentd.Output.Loki.TLS.Cert.SecretKey }}
+            - mountPath: /fluentd/output/loki/tls/tls.crt
+              name: loki-tls-cert
+              readOnly: true
+              subPath: {{ .Values.Fluentd.Output.Loki.TLS.Cert.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentd.Output.Loki.TLS.Key .Values.Fluentd.Output.Loki.TLS.Key.SecretName .Values.Fluentd.Output.Loki.TLS.Key.SecretKey }}
+            - mountPath: /fluentd/output/loki/tls/tls.key
+              name: loki-tls-key
+              readOnly: true
+              subPath: {{ .Values.Fluentd.Output.Loki.TLS.Key.SecretKey }}
+{{- end }}
+{{- end }}
+{{- end }}
+      volumes:
+{{ if eq .Values.ContainerRuntimeType "docker" }}
+{{ if ne .Values.OSKind "ubuntu" }}
+        - name: sysconfigdocker
+          hostPath:
+            path: "/etc/sysconfig/docker"
+            type: "FileOrCreate"
+{{ end }}
+        - name: dockerdaemon
+          hostPath:
+            path: "/etc/docker/daemon.json"
+            type: "FileOrCreate"
+        - name: dockerhostname
+          hostPath:
+            path: "/etc/hostname"
+            type: "FileOrCreate"
+        - name: varlibdockercontainers
+          hostPath:
+            path: "/var/lib/docker/containers"
+            type: ""
+{{ end }}
+        - name: varlog
+          hostPath:
+            path: "/var/log"
+            type: ""
+        - name: config
+          configMap:
+            name: "logging-fluentd"
+            defaultMode: 420 # RW grants for config map files
+{{ if .Values.Fluentd.TLS }}
+{{ if and .Values.Fluentd.TLS.GenerateCerts .Values.Fluentd.TLS.GenerateCerts.Enabled }}
+        - name: tls-ca
+          secret:
+            secretName: {{ .Values.Fluentd.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+        - name: tls-cert
+          secret:
+            secretName: {{ .Values.Fluentd.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+        - name: tls-key
+          secret:
+            secretName: {{ .Values.Fluentd.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ else }}
+{{ if and .Values.Fluentd.TLS.CA .Values.Fluentd.TLS.CA.SecretName .Values.Fluentd.TLS.CA.SecretKey }}
+        - name: tls-ca
+          secret:
+            secretName: {{ .Values.Fluentd.TLS.CA.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ end }}
+{{ if and .Values.Fluentd.TLS.Cert .Values.Fluentd.TLS.Cert.SecretName .Values.Fluentd.TLS.Cert.SecretKey }}
+        - name: tls-cert
+          secret:
+            secretName: {{ .Values.Fluentd.TLS.Cert.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ end }}
+{{ if and .Values.Fluentd.TLS.Key .Values.Fluentd.TLS.Key.SecretName .Values.Fluentd.TLS.Key.SecretKey }}
+        - name: tls-key
+          secret:
+            secretName: {{ .Values.Fluentd.TLS.Key.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ end }}
+{{ end }}
+{{ end }}
+{{- if and .Values.Fluentd.Output .Values.Fluentd.Output.Loki .Values.Fluentd.Output.Loki.Enabled }}
+{{- if and .Values.Fluentd.Output.Loki.Auth .Values.Fluentd.Output.Loki.Auth.Token .Values.Fluentd.Output.Loki.Auth.Token.Name .Values.Fluentd.Output.Loki.Auth.Token.Key }}
+        - name: loki-auth-token
+          secret:
+            secretName: {{ .Values.Fluentd.Output.Loki.Auth.Token.Name }}
+            defaultMode: 220
+{{- end }}
+{{- if and .Values.Fluentd.Output.Loki.TLS .Values.Fluentd.Output.Loki.TLS.Enabled }}
+{{- if and .Values.Fluentd.Output.Loki.TLS.CA .Values.Fluentd.Output.Loki.TLS.CA.SecretName .Values.Fluentd.Output.Loki.TLS.CA.SecretKey }}
+        - name: loki-tls-ca
+          secret:
+            secretName: {{ .Values.Fluentd.Output.Loki.TLS.CA.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentd.Output.Loki.TLS.Cert .Values.Fluentd.Output.Loki.TLS.Cert.SecretName .Values.Fluentd.Output.Loki.TLS.Cert.SecretKey }}
+        - name: loki-tls-cert
+          secret:
+            secretName: {{ .Values.Fluentd.Output.Loki.TLS.Cert.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentd.Output.Loki.TLS.Key .Values.Fluentd.Output.Loki.TLS.Key.SecretName .Values.Fluentd.Output.Loki.TLS.Key.SecretKey }}
+        - name: loki-tls-key
+          secret:
+            secretName: {{ .Values.Fluentd.Output.Loki.TLS.Key.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- end }}
+{{- end }}
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate

@@ -1,0 +1,14 @@
+{{- if .Values.integrationTests.install -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tests-config
+  labels:
+    app: logging-tests
+data:
+  {{- if include "logging.monitoredImages" . }}
+  dd_images: {{ include "logging.monitoredImages" . }}
+  {{ else }}
+  dd_images: ""
+  {{ end }}
+{{ end }}

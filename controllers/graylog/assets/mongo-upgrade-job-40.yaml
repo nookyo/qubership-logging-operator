@@ -1,0 +1,53 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-upgrade-job-40
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: mongo-upgrade-job
+    app.kubernetes.io/name: mongo-upgrade-job-40
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        name: mongo-upgrade-job
+        app.kubernetes.io/name: mongo-upgrade-job-40
+        app.kubernetes.io/component: graylog
+        app.kubernetes.io/part-of: logging
+        app.kubernetes.io/managed-by: logging-operator
+    spec:
+      restartPolicy: Never
+      volumes:
+        - name: mongodb
+          persistentVolumeClaim:
+            claimName: mongo-claim
+      containers:
+        - name: mongo
+          image: {{ .Values.Graylog.MongoDBUpgrade.MongoDBImage40 }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mongod --wiredTigerEngineConfigString="cache_size=512M" --fork --syslog
+              sleep 15
+              mongo --quiet --eval 'db.adminCommand( { setFeatureCompatibilityVersion: "4.0" } )'
+              mongod --shutdown
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: mongodb
+              mountPath: /data/db
+              readOnly: false
+          {{ if not .Values.OpenshiftDeploy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          {{ end }}
+      {{ if not .Values.OpenshiftDeploy }}
+      securityContext:
+        runAsUser: 1001
+        fsGroup: 1001
+      {{ end }}

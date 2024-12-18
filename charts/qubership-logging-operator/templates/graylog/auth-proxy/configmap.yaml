@@ -1,0 +1,149 @@
+{{- if .Values.graylog.install }}
+{{- if .Values.graylog.authProxy.install }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: graylog-auth-proxy-config
+  labels:
+    app.kubernetes.io/name: graylog-auth-proxy-config
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.graylog.annotations }}
+  annotations:
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+data:
+  config.yaml: |
+    log-level: {{ .Values.graylog.authProxy.logLevel | quote }}
+
+    host: 0.0.0.0
+    port: 8888
+    metrics-port: 8889
+
+    cookie: authproxy
+    auth-type: {{ .Values.graylog.authProxy.authType | quote }}
+    requests-timeout: {{ .Values.graylog.authProxy.requestsTimeout | default 30 }}
+
+    {{/* LDAP config section */}}
+    {{- if and (eq .Values.graylog.authProxy.authType "ldap") .Values.graylog.authProxy.ldap }}
+
+    ldap-url: {{ .Values.graylog.authProxy.ldap.url | quote }}
+    ldap-starttls: {{ .Values.graylog.authProxy.ldap.startTls }}
+    ldap-over-ssl: {{ .Values.graylog.authProxy.ldap.overSsl }}
+    auth-tls-insecure-skip-verify: {{ .Values.graylog.authProxy.ldap.skipVerify }}
+    
+    {{- if .Values.graylog.authProxy.ldap.ca }}
+    {{- if and .Values.graylog.authProxy.ldap.ca.secretName .Values.graylog.authProxy.ldap.ca.secretKey }}
+    auth-tls-ca-file: /usr/share/ssl/auth/ca.crt
+    {{- end }}
+    {{- end }}
+    {{- if .Values.graylog.authProxy.ldap.cert }}
+    {{- if and .Values.graylog.authProxy.ldap.cert.secretName .Values.graylog.authProxy.ldap.cert.secretKey }}
+    auth-tls-cert-file: /usr/share/ssl/auth/tls.crt
+    {{- end }}
+    {{- end }}
+    {{- if .Values.graylog.authProxy.ldap.key }}
+    {{- if and .Values.graylog.authProxy.ldap.key.secretName .Values.graylog.authProxy.ldap.key.secretKey }}
+    auth-tls-key-file: /usr/share/ssl/auth/tls.key
+    {{- end }}
+    {{- end }}
+
+    disable-referrals: {{ .Values.graylog.authProxy.ldap.disableReferrals }}
+
+    base-dn: {{ .Values.graylog.authProxy.ldap.baseDN | quote }}
+    bind-dn: {{ .Values.graylog.authProxy.ldap.bindDN | quote }}
+
+    htpasswd: "./.htpasswd"
+    filter: {{ .Values.graylog.authProxy.ldap.searchFilter | quote }}
+
+    {{- end }}
+    {{/* OAuth2 config section */}}
+    {{- if and (eq .Values.graylog.authProxy.authType "oauth") .Values.graylog.authProxy.oauth }}
+
+    oauth-host: {{ .Values.graylog.authProxy.oauth.host | quote }}
+    oauth-authorization-path: {{ .Values.graylog.authProxy.oauth.authorizationPath | quote }}
+    oauth-token-path: {{ .Values.graylog.authProxy.oauth.tokenPath | quote }}
+    oauth-userinfo-path: {{ .Values.graylog.authProxy.oauth.userinfoPath | quote }}
+    {{- if .Values.graylog.authProxy.oauth.redirectUri }}
+    oauth-redirect-uri: {{ .Values.graylog.authProxy.oauth.redirectUri | quote }}
+    {{- else }}
+    oauth-redirect-uri: {{ include "graylog.host" . }}code
+    {{- end }}
+
+    auth-tls-insecure-skip-verify: {{ .Values.graylog.authProxy.oauth.skipVerify }}
+    {{- if .Values.graylog.authProxy.oauth.ca }}
+    {{- if and .Values.graylog.authProxy.oauth.ca.secretName .Values.graylog.authProxy.oauth.ca.secretKey }}
+    auth-tls-ca-file: /usr/share/ssl/auth/ca.crt
+    {{- end }}
+    {{- end }}
+    {{- if .Values.graylog.authProxy.oauth.cert }}
+    {{- if and .Values.graylog.authProxy.oauth.cert.secretName .Values.graylog.authProxy.oauth.cert.secretKey }}
+    auth-tls-cert-file: /usr/share/ssl/auth/tls.crt
+    {{- end }}
+    {{- end }}
+    {{- if .Values.graylog.authProxy.oauth.key }}
+    {{- if and .Values.graylog.authProxy.oauth.key.secretName .Values.graylog.authProxy.oauth.key.secretKey }}
+    auth-tls-key-file: /usr/share/ssl/auth/tls.key
+    {{- end }}
+    {{- end }}
+
+    oauth-client-id: {{ .Values.graylog.authProxy.oauth.clientID | quote }}
+    oauth-htpasswd: "./.htpasswd"
+    oauth-scopes: {{ .Values.graylog.authProxy.oauth.scopes | quote }}
+    oauth-user-jsonpath: {{ .Values.graylog.authProxy.oauth.userJsonpath | quote }}
+    oauth-roles-jsonpath: {{ .Values.graylog.authProxy.oauth.rolesJsonpath | quote }}
+
+    {{- end }}
+
+    graylog-admin-user: "graylog_api_th_user"
+
+    {{- if .Values.graylog.tls }}
+    {{- if .Values.graylog.tls.http }}
+    {{- if .Values.graylog.tls.http.enabled }}
+    graylog-host: "https://127.0.0.1:9000"
+    proxy-tls-enabled: true
+
+    graylog-tls-insecure-skip-verify: false
+
+    {{- if ( include "graylog.cacerts.present" . ) }}
+    graylog-tls-ca-file: /usr/share/graylog/data/ssl/http/ca.crt
+    {{- end }}
+    {{- if ( include "graylog.cert.present" . ) }}
+    graylog-tls-cert-file: /usr/share/graylog/data/ssl/http/tls.crt
+    proxy-tls-cert-file: /usr/share/graylog/data/ssl/http/tls.crt
+    {{- end }}
+    {{- if ( include "graylog.key.present" . ) }}
+    graylog-tls-key-file: /usr/share/graylog/data/ssl/http/tls.key
+    proxy-tls-key-file: /usr/share/graylog/data/ssl/http/tls.key
+    {{- end }}
+    {{- end }}
+    {{- end }}
+    {{- end }}
+
+    {{- if .Values.graylog.authProxy.preCreatedUsers }}
+    graylog-pre-created-users: "{{ .Values.graylog.authProxy.preCreatedUsers }}"
+    {{- else }}
+    pre-created-users: "admin,auditViewer,operator,telegraf_operator,graylog-sidecar,graylog_api_th_user"
+    {{- end }}
+
+    rotation-pass-interval: {{ .Values.graylog.authProxy.rotationPassInterval | default 3 }}
+
+    {{- if .Values.graylog.authProxy.roleMapping }}
+    role-mapping: '{{ .Values.graylog.authProxy.roleMapping }}'
+    {{- else }}
+    role-mapping: '[]'
+    {{- end }}
+
+    {{- if .Values.graylog.authProxy.streamMapping }}
+    stream-mapping: '{{ .Values.graylog.authProxy.streamMapping }}'
+    {{- else }}
+    stream-mapping: ''
+    {{- end }}
+
+    http-realm: Restricted
+
+{{- end }}
+{{- end }}

@@ -1,0 +1,26 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+fluentd:
+  install: true
+
+  graylogHost: 1.2.3.4
+  graylogPort: 12201
+
+  # Custom FluentD configurations
+  customInputConf: |-
+    <source>
+      custom_input_configuration
+    </source>
+  customFilterConf: |-
+    <filter raw.kubernetes.var.log.**>
+      custom_filter_configuration
+    </filter>
+
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi

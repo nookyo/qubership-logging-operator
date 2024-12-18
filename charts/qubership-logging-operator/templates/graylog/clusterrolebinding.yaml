@@ -1,0 +1,27 @@
+{{- if .Values.createClusterAdminEntities }}
+{{- if .Values.graylog.install }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: psp:oob-privileged-psp
+  labels:
+    app.kubernetes.io/name: oob-privileged-psp
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.graylog.annotations }}
+  annotations:
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole # Must be Role or ClusterRole
+  name: psp:oob-privileged-psp # The name of the ClusterRole to bind to
+subjects:
+  - kind: ServiceAccount
+    name: logging-graylog
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

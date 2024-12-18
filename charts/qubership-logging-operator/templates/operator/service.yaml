@@ -1,0 +1,26 @@
+{{- if .Values.pprof.install }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: logging-service-operator
+  labels:
+    app.kubernetes.io/name: logging-service-operator
+    app.kubernetes.io/component: logging-operator
+    app.kubernetes.io/part-of: logging
+    {{- if .Values.pprof.service.labels }}
+      {{ toYaml .Values.pprof.service.labels | indent 4 }}
+    {{- end }}
+  {{- if .Values.pprof.service.annotations }}
+  annotations:
+  {{ toYaml .Values.pprof.service.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.pprof.service.type }}
+  ports:
+    - name: {{ .Values.pprof.service.portName }}
+      port: {{ .Values.pprof.service.port }}
+      targetPort: {{ .Values.pprof.containerPort }}
+      protocol: TCP
+  selector:
+    name: logging-service-operator
+{{- end }}

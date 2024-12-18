@@ -1,0 +1,22 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: logging-service-operator
+  labels:
+    app.kubernetes.io/name: logging-service-operator
+    app.kubernetes.io/component: logging-operator
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.labels }}
+    {{- toYaml .Values.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+subjects:
+- kind: ServiceAccount
+  name: logging-service-operator
+roleRef:
+  kind: Role
+  name: logging-service-operator
+  apiGroup: rbac.authorization.k8s.io

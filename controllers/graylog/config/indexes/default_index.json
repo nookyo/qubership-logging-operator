@@ -1,0 +1,23 @@
+{
+  "title": "Default index set",
+  "description": "The Graylog default index set",
+  "index_prefix": "graylog",
+  "shards": {{ if .Values.Graylog.IndexShards -}}{{ .Values.Graylog.IndexShards }}{{ else }}4{{ end }},
+  "replicas": {{ if .Values.Graylog.IndexReplicas -}}{{ .Values.Graylog.IndexReplicas }}{{ else }}1{{ end }},
+  "rotation_strategy_class": "org.graylog2.indexer.rotation.strategies.SizeBasedRotationStrategy",
+  "rotation_strategy": {
+    "type": "org.graylog2.indexer.rotation.strategies.SizeBasedRotationStrategyConfig",
+    "max_size": {{ if .Values.Graylog.MaxSize -}}{{ .Values.Graylog.MaxSize }}{{ else }}1073741824{{ end }}
+  },
+  "retention_strategy_class": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy",
+  "retention_strategy": {
+    "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
+    "max_number_of_indices": {{ if .Values.Graylog.MaxNumberOfIndices -}}{{ .Values.Graylog.MaxNumberOfIndices }}{{ else }}20{{ end }}
+  },
+  "index_analyzer": "standard",
+  "index_optimization_max_num_segments": 1,
+  "index_optimization_disabled": false,
+  "writable": true,
+  "default": true,
+  "field_type_refresh_interval": 5000
+}

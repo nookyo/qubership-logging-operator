@@ -1,0 +1,24 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+graylog:
+  install: true
+  password: admin
+  host: graylog.kubernetes.test.org
+  elasticsearchHost: http://<username>:<password>@opensearch.opensearch.svc:9200
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1500Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi
+
+  contentDeployPolicy: force-update
+
+  mongoUpgrade: true
+  mongoDBImage: mongo:5.0.19
+  mongoDBUpgrade:
+    mongoDBImage40: mongo:4.0.28
+    mongoDBImage42: mongo:4.2.22
+    mongoDBImage44: mongo:4.4.17

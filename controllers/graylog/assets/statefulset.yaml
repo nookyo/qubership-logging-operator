@@ -1,0 +1,559 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: graylog
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: graylog
+    app.kubernetes.io/name: graylog
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: graylog
+  strategy:
+    rollingUpdate:
+      maxSurge: 25
+      maxUnavailable: 25
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: graylog
+        app.kubernetes.io/name: graylog
+        app.kubernetes.io/component: graylog
+        app.kubernetes.io/part-of: logging
+        app.kubernetes.io/managed-by: logging-operator
+    spec:
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: graylog-claim
+        - name: plugins
+          emptyDir: {}
+        - name: mongodb
+          persistentVolumeClaim:
+            claimName: mongo-claim
+        - name: logsconf
+          configMap:
+            name: graylog-service
+            items:
+              - key: log4j2.xml
+                path: log4j2.xml
+            defaultMode: 0444
+        - name: graylogconf
+          configMap:
+            name: graylog-service
+            items:
+              - key: graylog.conf
+                path: graylog.conf
+            defaultMode: 0444
+        - name: nodeid
+          configMap:
+            name: graylog-service
+            items:
+              - key: node-id
+                path: node-id
+            defaultMode: 0666
+{{ if .Values.Graylog.AuthProxy }}
+{{ if .Values.Graylog.AuthProxy.Install }}
+        - name: graylog-auth-proxy-config
+          configMap:
+            name: graylog-auth-proxy-config
+            items:
+              - key: config.yaml
+                path: config.yaml
+            defaultMode: 0444
+        - name: graylog-auth-proxy-htpasswd
+          secret:
+            secretName: {{ .Values.Graylog.AuthProxy.BindPasswordSecret.Name }}
+            defaultMode: 420
+{{ if and .Values.Graylog.AuthProxy.CA .Values.Graylog.AuthProxy.CA.SecretName .Values.Graylog.AuthProxy.CA.SecretKey }}
+        - name: graylog-auth-proxy-ca-cert
+          secret:
+            secretName: {{ .Values.Graylog.AuthProxy.CA.SecretName }}
+            defaultMode: 420
+{{ end }}
+{{ if and .Values.Graylog.AuthProxy.Cert .Values.Graylog.AuthProxy.Cert.SecretName .Values.Graylog.AuthProxy.Cert.SecretKey }}
+        - name: graylog-auth-proxy-client-cert
+          secret:
+            secretName: {{ .Values.Graylog.AuthProxy.Cert.SecretName }}
+            defaultMode: 420
+{{ end }}
+{{ if and .Values.Graylog.AuthProxy.Key .Values.Graylog.AuthProxy.Key.SecretName .Values.Graylog.AuthProxy.Key.SecretKey }}
+        - name: graylog-auth-proxy-private-key
+          secret:
+            secretName: {{ .Values.Graylog.AuthProxy.Key.SecretName }}
+            defaultMode: 420
+{{ end }}
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS }}
+{{ if .Values.Graylog.TLS.HTTP }}
+{{ if and .Values.Graylog.TLS.HTTP.GenerateCerts .Values.Graylog.TLS.HTTP.GenerateCerts.Enabled }}
+        - name: tls-cert-http
+          secret:
+            secretName: {{ .Values.Graylog.TLS.HTTP.GenerateCerts.SecretName }}
+            defaultMode: 420
+        - name: tls-key-http
+          secret:
+            secretName: {{ .Values.Graylog.TLS.HTTP.GenerateCerts.SecretName }}
+            defaultMode: 420
+        - name: tls-cacerts-cert-manager
+          secret:
+            secretName: {{ .Values.Graylog.TLS.HTTP.GenerateCerts.SecretName }}
+            defaultMode: 420
+{{ else }}
+{{ if .Values.Graylog.TLS.HTTP.Cert }}
+{{ if and .Values.Graylog.TLS.HTTP.Cert.SecretName .Values.Graylog.TLS.HTTP.Cert.SecretKey }}
+        - name: tls-cert-http
+          secret:
+            secretName: {{ .Values.Graylog.TLS.HTTP.Cert.SecretName }}
+            defaultMode: 420
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.HTTP.Key }}
+{{ if and .Values.Graylog.TLS.HTTP.Key.SecretName .Values.Graylog.TLS.HTTP.Key.SecretKey }}
+        - name: tls-key-http
+          secret:
+            secretName: {{ .Values.Graylog.TLS.HTTP.Key.SecretName }}
+            defaultMode: 420
+{{ end }}
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.HTTP.CACerts }}
+        - name: tls-cacerts
+          secret:
+            secretName: {{ .Values.Graylog.TLS.HTTP.CACerts }}
+            defaultMode: 420
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.Input }}
+{{ if and .Values.Graylog.TLS.Input.GenerateCerts .Values.Graylog.TLS.Input.GenerateCerts.Enabled }}
+        - name: tls-cert-input
+          secret:
+            secretName: {{ .Values.Graylog.TLS.Input.GenerateCerts.SecretName }}
+            defaultMode: 420
+        - name: tls-key-input
+          secret:
+            secretName: {{ .Values.Graylog.TLS.Input.GenerateCerts.SecretName }}
+            defaultMode: 420
+{{ else }}
+{{ if .Values.Graylog.TLS.Input.Cert }}
+{{ if and .Values.Graylog.TLS.Input.Cert.SecretName .Values.Graylog.TLS.Input.Cert.SecretKey }}
+        - name: tls-cert-input
+          secret:
+            secretName: {{ .Values.Graylog.TLS.Input.Cert.SecretName }}
+            defaultMode: 420
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.Input.Key }}
+{{ if and .Values.Graylog.TLS.Input.Key.SecretName .Values.Graylog.TLS.Input.Key.SecretKey }}
+        - name: tls-key-input
+          secret:
+            secretName: {{ .Values.Graylog.TLS.Input.Key.SecretName }}
+            defaultMode: 420
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
+      serviceAccountName: logging-graylog
+{{ if and .Values.Graylog.NodeSelectorKey .Values.Graylog.NodeSelectorValue }}
+      nodeSelector:
+{{ .Values.Graylog.NodeSelectorKey | indent 8 }}: {{ .Values.Graylog.NodeSelectorValue }}
+{{ end }}
+      initContainers:
+        - name: "setup"
+          image: {{ .Values.Graylog.InitSetupImage }}
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/graylog/data
+              readOnly: false
+          # Graylog journal will recursive in every subdirectories. Any invalid format directories will cause errors
+          command:
+            - /bin/sh
+            - -c
+            - |
+              chmod -R 0777 /usr/share/graylog/data/
+              chown -R 1100:1100 /usr/share/graylog/data
+              mkdir /usr/share/graylog/data/archives
+              chown -R 1100:1100 /usr/share/graylog/data/archives
+              mkdir /usr/share/graylog/data/config
+              touch /usr/share/graylog/data/config/directories.json
+              chmod 0666 /usr/share/graylog/data/config/directories.json
+              chown 1100:1100 /usr/share/graylog/data/config/directories.json
+              echo "{}" >> /usr/share/graylog/data/config/directories.json
+              {{ if and .Values.Graylog.TLS .Values.Graylog.TLS.HTTP }}
+              mkdir /usr/share/graylog/data/ssl
+              chmod -R 0777 /usr/share/graylog/data/ssl
+              chown -R 1100:1100 /usr/share/graylog/data/ssl
+              {{ end }}
+          securityContext:
+            runAsNonRoot: false
+{{- if .Values.Graylog.InitResources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Graylog.InitResources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Graylog.InitResources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Graylog.InitResources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Graylog.InitResources.Requests "memory" }}
+{{- end }}
+{{- if .Values.Graylog.InitContainerDockerImage }}
+        - name: "download-plugins"
+          image: {{ .Values.Graylog.InitContainerDockerImage }}
+          imagePullPolicy: "IfNotPresent"
+          volumeMounts:
+            - name: plugins
+              mountPath: /opt/plugins
+          env:
+            - name: CUSTOM_PLUGINS
+              {{- if .Values.Graylog.CustomPluginsPaths }}
+              value: {{ .Values.Graylog.CustomPluginsPaths }}
+              {{- else }}
+              value: ""
+              {{- end }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+{{- if .Values.Graylog.InitResources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Graylog.InitResources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Graylog.InitResources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Graylog.InitResources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Graylog.InitResources.Requests "memory" }}
+{{- end }}
+{{- end }}
+      securityContext:
+        runAsNonRoot: false
+        runAsUser: 0
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+      containers:
+        - name: mongo
+          image: {{ .Values.Graylog.MongoDBImage }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              mongod --wiredTigerEngineConfigString="cache_size=512M"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: mongodb
+              mountPath: /data/db
+              readOnly: false
+          ports:
+            - name: mongo
+              containerPort: 27017
+              protocol: TCP
+{{- if .Values.Graylog.MongoResources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Graylog.MongoResources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Graylog.MongoResources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Graylog.MongoResources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Graylog.MongoResources.Requests "memory" }}
+{{- end }}
+{{ if not .Values.OpenshiftDeploy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+{{ end }}
+        - name: graylog
+          image: {{ .Values.Graylog.DockerImage }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              if [ -f /tmp/kafka-logs/.lock ] ; then
+                  rm /tmp/kafka-logs/.lock
+              fi
+{{ if and .Values.Graylog.TLS .Values.Graylog.TLS.HTTP }}
+              cp -a "/opt/java/openjdk/lib/security/cacerts" "/usr/share/graylog/data/ssl/cacerts.jks"
+              keytool -importcert -keystore /usr/share/graylog/data/ssl/cacerts.jks -storepass changeit -alias graylog-tls-ca -file /usr/share/graylog/data/ssl/http/tls.crt -noprompt
+{{ if and .Values.Graylog.TLS.HTTP.GenerateCerts .Values.Graylog.TLS.HTTP.GenerateCerts.Enabled }}
+              keytool -importcert -keystore /usr/share/graylog/data/ssl/cacerts.jks -storepass changeit -alias graylog-tls-ca-cert-manager -file /usr/share/graylog/data/ssl/cacerts/cert-manager-ca.crt -noprompt
+{{ end }}
+{{ if .Values.Graylog.TLS.HTTP.CACerts }}
+              for FILE in /usr/share/graylog/data/ssl/cacerts/*; do keytool -importcert -keystore /usr/share/graylog/data/ssl/cacerts.jks -storepass changeit -alias "$FILE" -file "$FILE" -noprompt; done
+{{ end }}
+{{ end }}
+              /docker-entrypoint.sh
+          env:
+            - name: GRAYLOG_SERVER_JAVA_OPTS
+              value: >-
+{{- if .Values.Graylog.JavaOpts }}
+                {{ .Values.Graylog.JavaOpts }}
+{{- else }}
+                -Xms1024m -Xmx1024m -Djna.tmpdir=/usr/share/graylog/data/plugin
+{{- end }}
+{{ if and .Values.Graylog.TLS .Values.Graylog.TLS.HTTP }}
+                -Djavax.net.ssl.trustStore=/usr/share/graylog/data/ssl/cacerts.jks
+{{ end }}
+            - name: GRAYLOG_ELASTICSEARCH_HOSTS
+              valueFrom:
+                secretKeyRef:
+                  key: elasticsearchHost
+                  name: {{ .Values.Graylog.GraylogSecretName }}
+            - name: GRAYLOG_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: user
+                  name: {{ .Values.Graylog.GraylogSecretName }}
+            - name: GRAYLOG_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: password
+                  name: {{ .Values.Graylog.GraylogSecretName }}
+            - name: GRAYLOG_SNAPSHOT_DIRECTORY
+              value: {{ .Values.Graylog.PathRepo }}
+{{- if .Values.Graylog.S3Archive }}
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  key: awsAccessKey
+                  name: {{ .Values.Graylog.GraylogSecretName }}
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  key: awsSecretKey
+                  name: {{ .Values.Graylog.GraylogSecretName }}
+{{- end }}
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9000
+              scheme: {{ if and .Values.Graylog.TLS .Values.Graylog.TLS.HTTP .Values.Graylog.TLS.HTTP.Enabled }}HTTPS{{ else }}HTTP{{ end }}
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9000
+              scheme: {{ if and .Values.Graylog.TLS .Values.Graylog.TLS.HTTP .Values.Graylog.TLS.HTTP.Enabled }}HTTPS{{ else }}HTTP{{ end }}
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            failureThreshold: 3
+            successThreshold: 1
+            timeoutSeconds: 5
+          volumeMounts:
+            - name: data
+              mountPath: /usr/share/graylog/data
+              readOnly: false
+            - name: plugins
+              mountPath: /usr/share/graylog/plugin
+            - name: logsconf
+              mountPath: /usr/share/graylog/data/config/log4j2.xml
+              subPath: log4j2.xml
+            - name: graylogconf
+              mountPath: /usr/share/graylog/data/config/graylog.conf
+              subPath: graylog.conf
+            - name: nodeid
+              mountPath: /usr/share/graylog/data/config/node-id
+              subPath: node-id
+{{ if .Values.Graylog.TLS }}
+{{ if .Values.Graylog.TLS.HTTP }}
+{{ if and .Values.Graylog.TLS.HTTP.GenerateCerts .Values.Graylog.TLS.HTTP.GenerateCerts.Enabled }}
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.crt
+              name: tls-cert-http
+              readOnly: true
+              subPath: "tls.crt"
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.key
+              name: tls-key-http
+              readOnly: true
+              subPath: "tls.key"
+            - mountPath: /usr/share/graylog/data/ssl/cacerts/cert-manager-ca.crt
+              name: tls-cacerts-cert-manager
+              readOnly: true
+              subPath: "ca.crt"
+{{ else }}
+{{ if .Values.Graylog.TLS.HTTP.Cert }}
+{{ if and .Values.Graylog.TLS.HTTP.Cert.SecretName .Values.Graylog.TLS.HTTP.Cert.SecretKey }}
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.crt
+              name: tls-cert-http
+              readOnly: true
+              subPath: {{ .Values.Graylog.TLS.HTTP.Cert.SecretKey }}
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.HTTP.Key }}
+{{ if and .Values.Graylog.TLS.HTTP.Key.SecretName .Values.Graylog.TLS.HTTP.Key.SecretKey }}
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.key
+              name: tls-key-http
+              readOnly: true
+              subPath: {{ .Values.Graylog.TLS.HTTP.Key.SecretKey }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.HTTP.CACerts }}
+            - mountPath: /usr/share/graylog/data/ssl/cacerts
+              name: tls-cacerts
+              readOnly: true
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.Input }}
+{{ if and .Values.Graylog.TLS.Input.GenerateCerts .Values.Graylog.TLS.Input.GenerateCerts.Enabled }}
+            - mountPath: /usr/share/graylog/data/ssl/input/tls.crt
+              name: tls-cert-input
+              readOnly: true
+              subPath: "tls.crt"
+            - mountPath: /usr/share/graylog/data/ssl/input/tls.key
+              name: tls-key-input
+              readOnly: true
+              subPath: "tls.key"
+{{ else }}
+{{ if .Values.Graylog.TLS.Input.Cert }}
+{{ if and .Values.Graylog.TLS.Input.Cert.SecretName .Values.Graylog.TLS.Input.Cert.SecretKey }}
+            - mountPath: /usr/share/graylog/data/ssl/input/tls.crt
+              name: tls-cert-input
+              readOnly: true
+              subPath: {{ .Values.Graylog.TLS.Input.Cert.SecretKey }}
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.Input.Key }}
+{{ if and .Values.Graylog.TLS.Input.Key.SecretName .Values.Graylog.TLS.Input.Key.SecretKey }}
+            - mountPath: /usr/share/graylog/data/ssl/input/tls.key
+              name: tls-key-input
+              readOnly: true
+              subPath: {{ .Values.Graylog.TLS.Input.Key.SecretKey }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ end }}
+          ports:
+            - name: graylog
+              containerPort: 9000
+              protocol: TCP
+            - name: graylog-udp
+              containerPort: 514
+              protocol: UDP
+            - name: graylog-{{ .Values.Graylog.InputPort }}
+              containerPort: {{ .Values.Graylog.InputPort }}
+              protocol: TCP
+{{- if .Values.Graylog.GraylogResources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Graylog.GraylogResources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Graylog.GraylogResources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Graylog.GraylogResources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Graylog.GraylogResources.Requests "memory" }}
+{{- end }}
+{{ if not .Values.OpenshiftDeploy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1100
+{{ end }}
+{{ if .Values.Graylog.AuthProxy }}
+{{ if .Values.Graylog.AuthProxy.Install }}
+        - name: graylog-auth-proxy
+          image: {{ .Values.Graylog.AuthProxy.Image }}
+          command:
+            - /bin/sh
+            - -c
+            - |
+              python /usr/src/app/graylog_auth_proxy.py --config "./config.yaml"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: graylog-auth-proxy-config
+              mountPath: /usr/src/app/config.yaml
+              subPath: config.yaml
+              readOnly: true
+            - name: graylog-auth-proxy-htpasswd
+              mountPath: /usr/src/app/.htpasswd
+              subPath: {{ .Values.Graylog.AuthProxy.BindPasswordSecret.Key }}
+              readOnly: true
+{{ if .Values.Graylog.TLS }}
+{{ if .Values.Graylog.TLS.HTTP }}
+{{ if and .Values.Graylog.TLS.HTTP.GenerateCerts .Values.Graylog.TLS.HTTP.GenerateCerts.Enabled }}
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.crt
+              name: tls-cert-http
+              readOnly: true
+              subPath: "tls.crt"
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.key
+              name: tls-key-http
+              readOnly: true
+              subPath: "tls.key"
+            - mountPath: /usr/share/graylog/data/ssl/http/ca.crt
+              name: tls-cacerts-cert-manager
+              readOnly: true
+              subPath: "ca.crt"
+{{ else }}
+{{ if .Values.Graylog.TLS.HTTP.Cert }}
+{{ if and .Values.Graylog.TLS.HTTP.Cert.SecretName .Values.Graylog.TLS.HTTP.Cert.SecretKey }}
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.crt
+              name: tls-cert-http
+              readOnly: true
+              subPath: {{ .Values.Graylog.TLS.HTTP.Cert.SecretKey }}
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.HTTP.Key }}
+{{ if and .Values.Graylog.TLS.HTTP.Key.SecretName .Values.Graylog.TLS.HTTP.Key.SecretKey }}
+            - mountPath: /usr/share/graylog/data/ssl/http/tls.key
+              name: tls-key-http
+              readOnly: true
+              subPath: {{ .Values.Graylog.TLS.HTTP.Key.SecretKey }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.HTTP.CACerts }}
+            - mountPath: /usr/share/graylog/data/ssl/http/ca.crt
+              name: tls-cacerts
+              readOnly: true
+              subPath: "ca.crt"
+{{ end }}
+{{ end }}
+{{ end }}
+{{- if and .Values.Graylog.AuthProxy.CA .Values.Graylog.AuthProxy.CA.SecretName .Values.Graylog.AuthProxy.CA.SecretKey }}
+            - mountPath: /usr/share/ssl/auth/ca.crt
+              name: graylog-auth-proxy-ca-cert
+              readOnly: true
+              subPath: {{ .Values.Graylog.AuthProxy.CA.SecretKey }}
+{{- end }}
+{{- if and .Values.Graylog.AuthProxy.Cert .Values.Graylog.AuthProxy.Cert.SecretName .Values.Graylog.AuthProxy.Cert.SecretKey }}
+            - mountPath: /usr/share/ssl/auth/tls.crt
+              name: graylog-auth-proxy-client-cert
+              readOnly: true
+              subPath: {{ .Values.Graylog.AuthProxy.Cert.SecretKey }}
+{{- end }}
+{{- if and .Values.Graylog.AuthProxy.Key .Values.Graylog.AuthProxy.Key.SecretName .Values.Graylog.AuthProxy.Key.SecretKey }}
+            - mountPath: /usr/share/ssl/auth/tls.key
+              name: graylog-auth-proxy-private-key
+              readOnly: true
+              subPath: {{ .Values.Graylog.AuthProxy.Key.SecretKey }}
+{{- end }}
+          ports:
+            - name: proxy
+              containerPort: 8888
+              protocol: TCP
+            - name: metrics
+              containerPort: 8889
+              protocol: TCP
+{{- if .Values.Graylog.AuthProxy.Resources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Graylog.AuthProxy.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Graylog.AuthProxy.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Graylog.AuthProxy.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Graylog.AuthProxy.Resources.Requests "memory" }}
+{{- end }}
+{{ if not .Values.OpenshiftDeploy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+{{ end }}
+{{ end }}
+{{ end }}

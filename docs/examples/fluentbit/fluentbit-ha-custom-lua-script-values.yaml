@@ -1,0 +1,47 @@
+# This is a YAML-formatted file.
+# All parameters specify only as example
+
+fluentbit:
+  install: true
+  systemLogType: varlogsyslog
+  containerLogging: true
+
+  customLuaScriptConf:
+    split.lua: |
+      function cb_split(tag, timestamp, record)
+        if record["x"] ~= nil then
+          return 2, timestamp, record["x"]
+        else
+          return 2, timestamp, record
+        end
+      end
+
+  aggregator:
+    graylogOutput: true
+    graylogHost: 1.2.3.4
+    graylogPort: 12201
+
+    customLuaScriptConf:
+      # In FluentBit config will be create the Lua script with the name "convert_to_utc.lua"
+      convert_to_utc.lua: |
+        function convert_to_utc(tag, timestamp, record)
+            local date_time = record["pub_date"]
+            local new_record = record
+            if date_time then
+                if string.find(date_time, ",") then
+                    local pattern = "(%a+, %d+ %a+ %d+ %d+:%d+:%d+) ([+-]%d%d%d%d)"
+                    local date_part, zone_part = date_time:match(pattern)
+                    if date_part and zone_part then
+                        local command = string.format("date -u -d '%s %s' +%%Y-%%m-%%dT%%H:%%M:%%SZ", date_part, zone_part)
+                        local handle = io.popen(command)
+                        local result = handle:read("*a")
+                        handle:close()
+                        new_record["pub_date"] = result:match("%S+")
+                    end
+                end
+            end
+            return 1, timestamp, new_record
+        end
+
+fluentd:
+  install: false

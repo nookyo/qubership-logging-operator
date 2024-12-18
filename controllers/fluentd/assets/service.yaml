@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: logging-fluentd
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: logging-fluentd
+    app.kubernetes.io/name: logging-fluentd
+    app.kubernetes.io/component: fluentd
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+    component: logging-fluentd
+{{- if .Values.OpenshiftDeploy }}
+    provider: openshift
+{{- else }}
+    provider: kubernetes
+{{- end }}
+spec:
+  selector:
+    name: logging-fluentd
+  ports:
+    - name: logging-fluentd
+      port: 24220
+      protocol: TCP
+      targetPort: 24220

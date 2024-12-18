@@ -1,0 +1,7 @@
+rule "Route Access logs"
+when
+  (has_field("logType") AND to_string($message.logType) == "access") OR
+  (has_field("log_type") AND to_string($message.log_type) == "access")
+then
+  route_to_stream(id: "{{ .streamId }}", remove_from_default: true);
+end

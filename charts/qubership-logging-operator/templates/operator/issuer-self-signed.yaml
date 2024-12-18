@@ -1,0 +1,19 @@
+{{- if or (include "graylog.http.generateCerts.enabled" . ) (include "graylog.input.generateCerts.enabled" . ) (include "fluentd.generateCerts.enabled" . ) (include "fluentbit.generateCerts.enabled" . ) (include "fluentbit.aggregator.generateCerts.enabled" . ) }}
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: logging-self-signed-issuer
+  labels:
+    app.kubernetes.io/name: logging-self-signed-issuer
+    app.kubernetes.io/component: logging-operator
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.labels }}
+    {{- toYaml .Values.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selfSigned: {}
+{{- end }}

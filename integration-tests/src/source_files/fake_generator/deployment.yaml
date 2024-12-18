@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    name: qubership-log-generator
+    metrics: qubership-log-generator
+  name: qubership-log-generator
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: qubership-log-generator
+  template:
+    metadata:
+      labels:
+        metrics: qubership-log-generator
+        name: qubership-log-generator
+    spec:
+      volumes:
+        - name: config
+          configMap:
+            name: qubership-log-generator-config
+            defaultMode: 420
+      containers:
+        - name: qubership-log-generator
+          image: >-
+            ghcr.io/netcracker/qubership-log-generator:main
+          ports:
+            - name: metrics
+              containerPort: 8080
+              protocol: TCP
+          env:
+            - name: LOG_MESSAGES_PER_SECOND
+              value: '10'
+            - name: LOG_GENERATION_TIME
+              value: '10'
+            - name: LOG_TEMPLATES
+              value: intlog,access,bc,go,java,json,nginx
+            - name: LOG_MESSAGES_MULTILINE
+              value: 'true'
+            - name: LOG_MULTILINE_PROBABILITY
+              value: '0.99'
+          resources:
+            limits:
+              cpu: 400m
+              memory: 512Mi
+            requests:
+              cpu: 100m
+              memory: 256Mi
+          volumeMounts:
+            - name: config
+              readOnly: true
+              mountPath: /opt/app/qubership-log-generator/etc
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: Always
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler

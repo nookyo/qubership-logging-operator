@@ -1,0 +1,43 @@
+{{- if .Values.graylog.install }}
+{{- if .Values.graylog.createIngress }}
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: graylog
+  labels:
+    app.kubernetes.io/name: graylog
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  annotations:
+  {{- if .Values.graylog.annotations }}
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+  {{- if and .Values.graylog.tls .Values.graylog.tls.http .Values.graylog.tls.http.enabled }}
+    nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+  {{- end }}
+spec:
+  {{- if and .Values.graylog.tls .Values.graylog.tls.http .Values.graylog.tls.http.enabled }}
+  tls:
+    - hosts:
+      - {{ regexFind "([-a-zA-Z\\d]+\\.)+([-a-zA-Z\\d])+" (include "graylog.host" .) }}
+      secretName: {{ include "graylog.secretName" . }}
+  {{- end }}
+  {{- if .Values.graylog.ingressClassName }}
+  ingressClassName: {{ .Values.graylog.ingressClassName }}
+  {{- end }}
+  rules:
+    - host: {{ regexFind "([-a-zA-Z\\d]+\\.)+([-a-zA-Z\\d])+" (include "graylog.host" .) }}
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: graylog-service
+                port:
+                  number: 9000
+{{- end }}
+{{- end }}

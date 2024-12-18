@@ -1,0 +1,7 @@
+rule "Route Bill Cycle logs"
+when
+  (has_field("nc_bill_cycle_label") OR
+  to_bool(regex(pattern: "var.log.bill-cycle.log$", value: to_string($message.tag)).matches))
+then
+  route_to_stream(id: "{{ .streamId }}", remove_from_default: true);
+end

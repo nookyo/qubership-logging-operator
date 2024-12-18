@@ -1,0 +1,7 @@
+rule "Route Audit logs"
+when
+  (has_field("nc_audit_label") OR
+  to_bool(regex(pattern: "var.log.(kube|ocp|ope|audit)+(-|[a-z.])*.?([a-z]|-)*audit.log$", value: to_string($message.tag)).matches))
+then
+  route_to_stream(id: "{{ .streamId }}", remove_from_default: true);
+end
