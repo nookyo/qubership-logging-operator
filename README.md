@@ -1,6 +1,11 @@
 # qubership-logging-operator
 
-The Logging Service Operator deploys Graylog, FluentD, FluentBit and K8S Events Reader on Kubernetes.
+The Logging Operator deploys in Kubernetes next components:
+
+* Graylog
+* FluentD
+* FluentBit
+* K8S Events Reader
 
 ## Concept
 
@@ -17,7 +22,7 @@ This Operator is created using Operator SDK. For more information, refer to
 
 The main features are as follows:
 
-* Logging service deployment via the template
+* Logging deployment via the template
 * Kubernetes and OpenShift support
 * FluentD deployment
 * FluentBit deployment
