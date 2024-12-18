@@ -17,8 +17,8 @@ jobs:
           - name: qubership-logging-operator
             file: Dockerfile
           - name: qubership-logging-integration-tests
+            file: integration-tests/Dockerfile
             context: integration-tests
-            file: Dockerfile
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
