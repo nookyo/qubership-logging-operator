@@ -1,0 +1,39 @@
+{
+  "title": "input-{{ .Values.Graylog.InputPort }}",
+  "configuration": {
+    "recv_buffer_size": 1048576,
+    "tcp_keepalive": false,
+    "use_null_delimiter": true,
+    "tls_client_auth_cert_file": "",
+    "bind_address": "0.0.0.0",
+    "decompress_size_limit": 8388608,
+    "port": {{ .Values.Graylog.InputPort }},
+{{ if and .Values.Graylog.TLS .Values.Graylog.TLS.Input }}
+{{ if and .Values.Graylog.TLS.Input.GenerateCerts .Values.Graylog.TLS.Input.GenerateCerts.Enabled }}
+    "tls_cert_file": "/usr/share/graylog/data/ssl/input/tls.crt",
+    "tls_key_file": "/usr/share/graylog/data/ssl/input/tls.key",
+{{ else }}
+{{ if .Values.Graylog.TLS.Input.Cert }}
+    "tls_cert_file": {{ if and .Values.Graylog.TLS.Input.Cert.SecretName .Values.Graylog.TLS.Input.Cert.SecretKey }}"/usr/share/graylog/data/ssl/input/tls.crt"{{ else }}""{{ end }},
+{{ end }}
+{{ if .Values.Graylog.TLS.Input.Key }}
+    "tls_key_file": {{ if and .Values.Graylog.TLS.Input.Key.SecretName .Values.Graylog.TLS.Input.Key.SecretKey }}"/usr/share/graylog/data/ssl/input/tls.key"{{ else }}""{{ end }},
+{{ end }}
+{{ end }}
+{{ if .Values.Graylog.TLS.Input.KeyFilePassword }}
+    "tls_key_password": "{{ .Values.Graylog.TLS.Input.KeyFilePassword }}",
+{{ end }}
+    "tls_enable": {{ .Values.Graylog.TLS.Input.Enabled }},
+{{ else }}
+    "tls_cert_file": "",
+    "tls_key_file": "",
+    "tls_key_password": "",
+    "tls_enable": false,
+{{ end }}
+    "max_message_size": 2097152,
+    "tls_client_auth": "disabled",
+    "override_source": null
+  },
+  "type": "org.graylog2.inputs.gelf.tcp.GELFTCPInput",
+  "global": true
+}

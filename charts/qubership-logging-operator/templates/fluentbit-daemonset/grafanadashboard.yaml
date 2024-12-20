@@ -1,0 +1,20 @@
+{{- if .Values.fluentbit.install }}
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDashboard
+metadata:
+  name: fluentbit-metrics-v1
+  labels:
+    app.kubernetes.io/name: fluentbit-metrics-v1
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentbit.labels }}
+    {{- toYaml .Values.fluentbit.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.fluentbit.annotations }}
+  annotations:
+    {{- toYaml .Values.fluentbit.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  json: |
+{{ .Files.Get "monitoring/fluentbit-dashboard.json" | indent 4 }}
+{{- end }}

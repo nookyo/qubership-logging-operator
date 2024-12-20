@@ -1,0 +1,161 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: qubership-log-generator-config
+  labels:
+    name: qubership-log-generator
+data:
+  custom_config.conf: |
+    config:
+    - name: "go"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}] /go/pkg/mod/example.com/${package}:${line}: ${message}"
+      fields:
+        level:
+          - INFO
+        package:
+          - test-rep/test@0.0.1/config.go
+        line:
+          - "32"
+        message:
+          - Message successfully submitted go_info_log
+    - name: "go"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}][caller=${class}.go] msg=\"${message}\""
+      fields:
+        class:
+          - node_exporter
+        level:
+          - WARN
+        message:
+          - Parsed flag --collector.filesystem.fs-types-exclude go_warn_log    
+    - name: "go"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}] ${dashboard} failed to request dashboard url, falling back to config map; if specified {\"error\": \"request failed with status 404\"} go_error_log"
+      fields:
+        level:
+          - ERROR
+        dashboard:
+          - test-dashboard
+    - name: "go"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}][caller=${class}.go]msg=\"${message}\""
+      fields:
+        class:
+          - tls_config
+        level:
+          - DEBUG
+        message:
+          - Build context go_debug_log
+    - name: "go"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}][caller=${class}.go]msg=\"${message}\""
+      fields:
+        class:
+          - node_exporter
+        level:
+          - FATAL
+        message:
+          - Parsed flag --collector.filesystem.fs-types-exclude go_fatal_log
+    - name: "go"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}] ${dashboard} failed to request dashboard url, falling back to config map; if specified {\"error\": \"request failed with status 404\"} go_multiline_log_parent"
+      fields:
+        level:
+          - ERROR
+        dashboard:
+          - test-dashboard
+      multiline:
+        - template: "repository.org/grafana-operator/grafana-operator/v4/controllers/grafanadashboard.(*${class}).${method} go_multiline_log_child"
+          fields:
+            class:
+              - DashboardPipelineImpl
+            method:
+              - obtainJson
+    - name: "java"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}] ${package}.${class}: ${explanation} java_info_log;"
+      fields:
+        level:
+          - info
+        package:
+          - com.nc.application.generator
+        class:
+          - InterruptedTestException
+        explanation:
+          - clean channel shutdown
+    - name: "java"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}] ${package}.${class}: ${explanation} java_warn_log;"
+      fields:
+        level:
+          - warn
+        package:
+          - com.nc.application.executor
+        class:
+          - BadException
+        explanation:
+          - socket closed
+    - name: "java"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}] ${package}.${class}: ${explanation} java_error_log;"
+      fields:
+        level:
+          - error
+        package:
+          - com.nc.application.provider
+        class:
+          - ArrayIndexOutOfBoundsException
+        explanation:
+          - connection refused
+    - name: "java"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "[yyyy-MM-dd'T'HH:mm:ss.SSS]"
+      template: "[${level}] ${package}.${class}: ${explanation}; java_multiline_log_parent"
+      fields:
+        level:
+          - error
+        package:
+          - com.nc.application.provider
+        class:
+          - ArrayIndexOutOfBoundsException
+        explanation:
+          - connection refused
+      multiline:
+        - template: "${method} request ${address}:6300/${path} : SUCCESS java_multiline_log_child"
+          fields:
+            method:
+              - GET
+            path:
+              - api/orders
+            address:
+              - "1.2.3.4"
+    - name: "json"
+      messagesPerSec: 10
+      generationTime: 1
+      dateFormat: "{\"'lvl'\":\"'ERROR'\",\"'ts'\":\"yyyy-MM-dd'T'HH:mm:ss.SSS\""
+      template: ",\"logger\":\"${logger}\",\"msg\":\"${message} json_log\",\"from\":\"qubership-log-generator\"}"
+      fields:
+        logger:
+          - test_operator_reconciler
+        message:
+          - Reconciling component

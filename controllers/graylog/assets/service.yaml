@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: graylog-service
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: graylog
+    app.kubernetes.io/name: graylog-service
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+spec:
+  selector:
+    name: graylog
+  ports:
+    {{ if .Values.Graylog.AuthProxy.Install }}
+    - name: graylog
+      port: 9000
+      protocol: TCP
+      targetPort: 8888
+    - name: metrics
+      port: 8889
+      protocol: TCP
+      targetPort: 8889
+    {{ else }}
+    - name: graylog
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+    {{ end }}
+    - name: graylog-udp
+      port: 514
+      protocol: UDP
+      targetPort: 514
+    - name: graylog-{{ .Values.Graylog.InputPort }}
+      port: {{ .Values.Graylog.InputPort }}
+      protocol: TCP
+      targetPort: {{ .Values.Graylog.InputPort }}

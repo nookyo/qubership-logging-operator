@@ -1,0 +1,42 @@
+{{- if include "fluentd.generateCerts.enabled" . }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fluentd-tls-certificate
+  labels:
+    app.kubernetes.io/name: fluentd-tls-certificate
+    app.kubernetes.io/component: fluentd
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentd.labels }}
+    {{- toYaml .Values.fluentd.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.fluentd.annotations }}
+  annotations:
+    {{- toYaml .Values.fluentd.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ default "fluentd-cert-manager-tls" .Values.fluentd.tls.generateCerts.secretName }}
+  duration: {{ default 365 .Values.fluentd.tls.generateCerts.duration | mul 24 }}h
+  renewBefore: {{ default 15 .Values.fluentd.tls.generateCerts.renewBefore | mul 24 }}h
+  commonName: fluentd-crt
+  isCA: false
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+    - localhost
+    - logging-fluentd.{{ .Release.Namespace }}.svc
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+  {{- if .Values.fluentd.tls.generateCerts.clusterIssuerName }}
+    name: {{ .Values.fluentd.tls.generateCerts.clusterIssuerName }}
+    kind: ClusterIssuer
+  {{- else }}
+    name: logging-ca-issuer
+    kind: Issuer
+  {{- end }}
+    group: cert-manager.io
+{{- end }}

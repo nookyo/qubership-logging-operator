@@ -1,0 +1,321 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: logging-fluentbit
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: logging-fluentbit
+    app.kubernetes.io/name: logging-fluentbit
+    app.kubernetes.io/component: fluentbit
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+    component: logging-fluentbit
+{{- if .Values.OpenshiftDeploy }}
+    provider: openshift
+{{- else }}
+    provider: kubernetes
+{{- end }}
+    kubernetes.io/cluster-service: "true"
+spec:
+  minReadySeconds: 60
+  selector:
+    matchLabels:
+      component: logging-fluentbit
+{{- if .Values.OpenshiftDeploy }}
+      provider: openshift
+{{- else }}
+      provider: kubernetes
+{{- end }}
+  template:
+    metadata:
+      name: logging-fluentbit
+      labels:
+        name: logging-fluentbit
+        app.kubernetes.io/name: logging-fluentbit
+        app.kubernetes.io/component: fluentbit
+        app.kubernetes.io/part-of: logging
+        app.kubernetes.io/managed-by: logging-operator
+        component: logging-fluentbit
+{{- if .Values.OpenshiftDeploy }}
+        provider: openshift
+ {{- else }}
+        provider: kubernetes
+{{- end }}
+        kubernetes.io/cluster-service: "true"
+    spec:
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: logging-fluentbit
+      tolerations:
+        - key: node-role.kubernetes.io/master
+          operator: Exists
+          effect: NoSchedule
+        - operator: "Exists"
+          effect: "NoExecute"
+        - operator: "Exists"
+          effect: "NoSchedule"
+      containers:
+        - name: configmap-reload
+          image: {{ .Values.Fluentbit.ConfigmapReload.DockerImage }}
+          args:
+            - --volume-dir=/fluent-bit/etc
+            - --webhook-url=http://localhost:2020/api/v2/reload
+            - --webhook-retries=5
+          volumeMounts:
+            - mountPath: /fluent-bit/etc
+              name: config
+              readOnly: true
+          {{- if .Values.Fluentbit.ConfigmapReload.Resources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Fluentbit.ConfigmapReload.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.ConfigmapReload.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Fluentbit.ConfigmapReload.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.ConfigmapReload.Resources.Requests "memory" }}
+          {{- end }}
+          ports:
+            - containerPort: 9533
+              name: reload-metrics
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+        - name: logging-fluentbit
+          image: {{ .Values.Fluentbit.DockerImage }}
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            privileged: {{ .Values.Fluentbit.SecurityContextPrivileged }}
+          ports:
+            - containerPort: 2020
+              protocol: TCP
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 2020
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 2020
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+{{- if .Values.Fluentbit.Resources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Fluentbit.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Fluentbit.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.Resources.Requests "memory" }}
+{{- end }}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+{{- if and .Values.Fluentbit.Output .Values.Fluentbit.Output.Loki .Values.Fluentbit.Output.Loki.Enabled }}
+{{- if and .Values.Fluentbit.Output.Loki.Auth .Values.Fluentbit.Output.Loki.Auth.User .Values.Fluentbit.Output.Loki.Auth.User.Name .Values.Fluentbit.Output.Loki.Auth.User.Key .Values.Fluentbit.Output.Loki.Auth.Password .Values.Fluentbit.Output.Loki.Auth.Password.Name .Values.Fluentbit.Output.Loki.Auth.Password.Key }}
+            - name: LOKI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentbit.Output.Loki.Auth.User.Name }}
+                  key: {{ .Values.Fluentbit.Output.Loki.Auth.User.Key }}
+            - name: LOKI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentbit.Output.Loki.Auth.Password.Name }}
+                  key: {{ .Values.Fluentbit.Output.Loki.Auth.Password.Key }}
+{{- else if and .Values.Fluentbit.Output.Loki.Auth .Values.Fluentbit.Output.Loki.Auth.Token .Values.Fluentbit.Output.Loki.Auth.Token.Name .Values.Fluentbit.Output.Loki.Auth.Token.Key }}
+            - name: LOKI_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentbit.Output.Loki.Auth.Token.Name }}
+                  key: {{ .Values.Fluentbit.Output.Loki.Auth.Token.Key }}
+{{- end }}
+{{- end }}
+          volumeMounts:
+{{ if eq .Values.ContainerRuntimeType "docker" }}
+{{ if ne .Values.OSKind "ubuntu" }}
+            - mountPath: /etc/sysconfig/docker
+              name: sysconfigdocker
+              readOnly: true
+{{ end }}
+            - mountPath: /etc/docker/daemon.json
+              name: dockerdaemon
+              readOnly: true
+            - mountPath: /etc/docker-hostname
+              name: dockerhostname
+              readOnly: true
+            - mountPath: /var/lib/docker/containers
+              name: varlibdockercontainers
+              readOnly: true
+{{ end }}
+            - mountPath: /var/log
+              name: varlog
+            - mountPath: /fluent-bit/etc
+              name: config
+              readOnly: true
+{{ if .Values.Fluentbit.TLS }}
+{{ if and .Values.Fluentbit.TLS.GenerateCerts .Values.Fluentbit.TLS.GenerateCerts.Enabled }}
+            - mountPath: /fluent-bit/tls/ca.crt
+              name: tls-ca
+              readOnly: true
+              subPath: "ca.crt"
+            - mountPath: /fluent-bit/tls/tls.crt
+              name: tls-cert
+              readOnly: true
+              subPath: "tls.crt"
+            - mountPath: /fluent-bit/tls/tls.key
+              name: tls-key
+              readOnly: true
+              subPath: "tls.key"
+{{ else }}
+{{ if and .Values.Fluentbit.TLS.CA .Values.Fluentbit.TLS.CA.SecretName .Values.Fluentbit.TLS.CA.SecretKey }}
+            - mountPath: /fluent-bit/tls/ca.crt
+              name: tls-ca
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.TLS.CA.SecretKey }}
+{{ end }}
+{{ if and .Values.Fluentbit.TLS.Cert .Values.Fluentbit.TLS.Cert.SecretName .Values.Fluentbit.TLS.Cert.SecretKey }}
+            - mountPath: /fluent-bit/tls/tls.crt
+              name: tls-cert
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.TLS.Cert.SecretKey }}
+{{ end }}
+{{ if and .Values.Fluentbit.TLS.Key .Values.Fluentbit.TLS.Key.SecretName .Values.Fluentbit.TLS.Key.SecretKey }}
+            - mountPath: /fluent-bit/tls/tls.key
+              name: tls-key
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.TLS.Key.SecretKey }}
+{{ end }}
+{{ end }}
+{{ end }}
+{{- if and .Values.Fluentbit.Output .Values.Fluentbit.Output.Loki .Values.Fluentbit.Output.Loki.Enabled }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS .Values.Fluentbit.Output.Loki.TLS.Enabled }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS.CA .Values.Fluentbit.Output.Loki.TLS.CA.SecretName .Values.Fluentbit.Output.Loki.TLS.CA.SecretKey }}
+            - mountPath: /fluent-bit/output/loki/tls/ca.crt
+              name: loki-tls-ca
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Output.Loki.TLS.CA.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS.Cert .Values.Fluentbit.Output.Loki.TLS.Cert.SecretName .Values.Fluentbit.Output.Loki.TLS.Cert.SecretKey }}
+            - mountPath: /fluent-bit/output/loki/tls/tls.crt
+              name: loki-tls-cert
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Output.Loki.TLS.Cert.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS.Key .Values.Fluentbit.Output.Loki.TLS.Key.SecretName .Values.Fluentbit.Output.Loki.TLS.Key.SecretKey }}
+            - mountPath: /fluent-bit/output/loki/tls/tls.key
+              name: loki-tls-key
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Output.Loki.TLS.Key.SecretKey }}
+{{- end }}
+{{- end }}
+{{- end }}
+      volumes:
+{{ if eq .Values.ContainerRuntimeType "docker" }}
+{{ if ne .Values.OSKind "ubuntu" }}
+        - name: sysconfigdocker
+          hostPath:
+            path: "/etc/sysconfig/docker"
+            type: "FileOrCreate"
+{{ end }}
+        - name: dockerdaemon
+          hostPath:
+            path: "/etc/docker/daemon.json"
+            type: "FileOrCreate"
+        - name: dockerhostname
+          hostPath:
+            path: "/etc/hostname"
+            type: "FileOrCreate"
+        - name: varlibdockercontainers
+          hostPath:
+            path: "/var/lib/docker/containers"
+            type: ""
+{{ end }}
+        - name: varlog
+          hostPath:
+            path: "/var/log"
+            type: ""
+        - name: config
+          configMap:
+            name: "logging-fluentbit"
+            defaultMode: 420 # RW grants for config map files
+{{ if .Values.Fluentbit.TLS }}
+{{ if and .Values.Fluentbit.TLS.GenerateCerts .Values.Fluentbit.TLS.GenerateCerts.Enabled }}
+        - name: tls-ca
+          secret:
+            secretName: {{ .Values.Fluentbit.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+        - name: tls-cert
+          secret:
+            secretName: {{ .Values.Fluentbit.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+        - name: tls-key
+          secret:
+            secretName: {{ .Values.Fluentbit.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ else }}
+{{ if and .Values.Fluentbit.TLS.CA .Values.Fluentbit.TLS.CA.SecretName .Values.Fluentbit.TLS.CA.SecretKey }}
+        - name: tls-ca
+          secret:
+            secretName: {{ .Values.Fluentbit.TLS.CA.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ end }}
+{{ if and .Values.Fluentbit.TLS.Cert .Values.Fluentbit.TLS.Cert.SecretName .Values.Fluentbit.TLS.Cert.SecretKey }}
+        - name: tls-cert
+          secret:
+            secretName: {{ .Values.Fluentbit.TLS.Cert.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ end }}
+{{ if and .Values.Fluentbit.TLS.Key .Values.Fluentbit.TLS.Key.SecretName .Values.Fluentbit.TLS.Key.SecretKey }}
+        - name: tls-key
+          secret:
+            secretName: {{ .Values.Fluentbit.TLS.Key.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{ end }}
+{{ end }}
+{{ end }}
+{{- if and .Values.Fluentbit.Output .Values.Fluentbit.Output.Loki .Values.Fluentbit.Output.Loki.Enabled }}
+{{- if and .Values.Fluentbit.Output.Loki.Auth .Values.Fluentbit.Output.Loki.Auth.Token .Values.Fluentbit.Output.Loki.Auth.Token.Name .Values.Fluentbit.Output.Loki.Auth.Token.Key }}
+        - name: loki-auth-token
+          secret:
+            secretName: {{ .Values.Fluentbit.Output.Loki.Auth.Token.Name }}
+            defaultMode: 220
+{{- end }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS .Values.Fluentbit.Output.Loki.TLS.Enabled }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS.CA .Values.Fluentbit.Output.Loki.TLS.CA.SecretName .Values.Fluentbit.Output.Loki.TLS.CA.SecretKey }}
+        - name: loki-tls-ca
+          secret:
+            secretName: {{ .Values.Fluentbit.Output.Loki.TLS.CA.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS.Cert .Values.Fluentbit.Output.Loki.TLS.Cert.SecretName .Values.Fluentbit.Output.Loki.TLS.Cert.SecretKey }}
+        - name: loki-tls-cert
+          secret:
+            secretName: {{ .Values.Fluentbit.Output.Loki.TLS.Cert.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentbit.Output.Loki.TLS.Key .Values.Fluentbit.Output.Loki.TLS.Key.SecretName .Values.Fluentbit.Output.Loki.TLS.Key.SecretKey }}
+        - name: loki-tls-key
+          secret:
+            secretName: {{ .Values.Fluentbit.Output.Loki.TLS.Key.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- end }}
+{{- end }}
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate

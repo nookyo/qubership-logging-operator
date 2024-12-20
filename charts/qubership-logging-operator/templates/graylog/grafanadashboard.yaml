@@ -1,0 +1,20 @@
+{{- if .Values.graylog.install }}
+apiVersion: integreatly.org/v1alpha1
+kind: GrafanaDashboard
+metadata:
+  name: graylog-grafana-dashboard-k8s
+  labels:
+    app.kubernetes.io/name: graylog-grafana-dashboard-k8s
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.graylog.annotations }}
+  annotations:
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  json: |
+{{ .Files.Get "monitoring/graylog-dashboard.json" | indent 4 }}
+{{- end }}

@@ -1,0 +1,36 @@
+{{- if .Values.graylog.install }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-claim
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: mongo-claim
+    app.kubernetes.io/name: mongo-claim
+    app.kubernetes.io/instance: {{ cat "mongo-claim-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+    {{- $image := include "graylog.image" . }}
+    app.kubernetes.io/version: {{ splitList ":" $image | last }}
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.graylog.annotations }}
+  annotations:
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 512M
+  {{- if .Values.graylog.mongoPersistentVolume }}
+  volumeName: {{ .Values.graylog.mongoPersistentVolume }}
+  {{- end }}
+  {{- if .Values.graylog.mongoStorageClassName }}
+  storageClassName: {{ .Values.graylog.mongoStorageClassName }}
+  {{- else if .Values.graylog.mongoPersistentVolume }}
+  storageClassName: ""
+  {{- end }}
+{{- end }}

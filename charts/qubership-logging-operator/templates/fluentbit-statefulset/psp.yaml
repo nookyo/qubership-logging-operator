@@ -1,0 +1,59 @@
+{{- if .Capabilities.APIVersions.Has "policy/v1beta1" }}
+{{- if .Values.createClusterAdminEntities }}
+{{- if .Values.fluentbit.install }}
+{{- if .Values.fluentbit.aggregator }}
+{{- if .Values.fluentbit.aggregator.install }}
+{{- if .Values.fluentbit.aggregator.securityResources.install }}
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ .Values.fluentbit.aggregator.securityResources.name }}
+  annotations:
+    kubernetes.io/description: {{ .Values.fluentbit.aggregator.securityResources.name }} psp is used for the fluentbit aggregator stateful set
+  {{- if .Values.fluentbit.annotations }}
+    {{- toYaml .Values.fluentbit.annotations | nindent 4 }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.fluentbit.aggregator.securityResources.name }}
+    app.kubernetes.io/component: fluentbit
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentbit.labels }}
+    {{- toYaml .Values.fluentbit.labels | nindent 4 }}
+  {{- end }}
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  # Allow core volume types.
+  volumes:
+    - 'configMap'
+    - 'secret'
+    - 'persistentVolumeClaim'
+    - 'emptyDir'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    # Permits the container to run with root privileges as well.
+    rule: 'RunAsAny'
+  seLinux:
+    # This policy assumes the nodes are using AppArmor rather than SELinux.
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      # Allow adding the root group.
+      - min: 0
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      # Allow adding the root group.
+      - min: 0
+        max: 65535
+  readOnlyRootFilesystem: false
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

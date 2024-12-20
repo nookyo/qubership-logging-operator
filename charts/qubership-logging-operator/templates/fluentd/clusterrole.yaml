@@ -1,0 +1,41 @@
+{{- if .Values.createClusterAdminEntities }}
+{{- if .Values.fluentd.install }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: logging-cluster-role
+  labels:
+    app.kubernetes.io/name: logging-cluster-role
+    app.kubernetes.io/component: fluentd
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentd.labels }}
+    {{- toYaml .Values.fluentd.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.fluentd.annotations }}
+  annotations:
+    {{- toYaml .Values.fluentd.annotations | nindent 4 }}
+  {{- end }}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+      - namespaces
+      - events
+      - endpoints
+    verbs:
+      - get
+      - list
+      - watch
+  {{- if $.Capabilities.APIVersions.Has "policy/v1beta1" }}
+  - apiGroups:
+      - policy
+    resources:
+      - podsecuritypolicies
+    verbs:
+      - use
+    resourceNames:
+      - {{ .Values.fluentd.securityResources.name }}
+  {{- end }}
+{{- end }}
+{{- end }}

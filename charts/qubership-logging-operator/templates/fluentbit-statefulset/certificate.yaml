@@ -1,0 +1,48 @@
+{{- if .Values.fluentbit.install }}
+{{- if .Values.fluentbit.aggregator }}
+{{- if .Values.fluentbit.aggregator.install }}
+{{- if (include "fluentbit.aggregator.generateCerts.enabled" . ) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: fluentbit-aggregator-tls-certificate
+  labels:
+    app.kubernetes.io/name: fluentbit-aggregator-tls-certificate
+    app.kubernetes.io/component: fluentbit
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentbit.labels }}
+    {{- toYaml .Values.fluentbit.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.fluentbit.annotations }}
+  annotations:
+    {{- toYaml .Values.fluentbit.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ default "fluentbit-aggregator-cert-manager-tls" .Values.fluentbit.aggregator.tls.generateCerts.secretName }}
+  duration: {{ default 365 .Values.fluentbit.aggregator.tls.generateCerts.duration | mul 24 }}h
+  renewBefore: {{ default 15 .Values.fluentbit.aggregator.tls.generateCerts.renewBefore | mul 24 }}h
+  commonName: fluentbit-aggregator-crt
+  isCA: false
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+    - localhost
+    - logging-fluentbit-aggregator.{{ .Release.Namespace }}.svc
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+  {{- if .Values.fluentbit.aggregator.tls.generateCerts.clusterIssuerName }}
+    name: {{ .Values.fluentbit.aggregator.tls.generateCerts.clusterIssuerName }}
+    kind: ClusterIssuer
+  {{- else }}
+    name: logging-ca-issuer
+    kind: Issuer
+  {{- end }}
+    group: cert-manager.io
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

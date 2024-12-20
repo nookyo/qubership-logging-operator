@@ -1,0 +1,43 @@
+{{- if include "graylog.http.generateCerts.enabled" . }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: graylog-http-tls-certificate
+  labels:
+    app.kubernetes.io/name: graylog-http-tls-certificate
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.graylog.annotations }}
+  annotations:
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: {{ default "graylog-http-cert-manager-tls" .Values.graylog.tls.http.generateCerts.secretName }}
+  duration: {{ default 365 .Values.graylog.tls.http.generateCerts.duration | mul 24 }}h
+  renewBefore: {{ default 15 .Values.graylog.tls.http.generateCerts.renewBefore | mul 24 }}h
+  commonName: graylog-http-crt
+  isCA: false
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+    - localhost
+    - graylog-service.{{ .Release.Namespace }}.svc
+    - {{ regexFind "([-a-zA-Z\\d]+\\.)+([-a-zA-Z\\d])+" (include "graylog.host" .) }}
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+  {{- if .Values.graylog.tls.http.generateCerts.clusterIssuerName }}
+    name: {{ .Values.graylog.tls.http.generateCerts.clusterIssuerName }}
+    kind: ClusterIssuer
+  {{- else }}
+    name: logging-ca-issuer
+    kind: Issuer
+  {{- end }}
+    group: cert-manager.io
+{{- end }}

@@ -1,0 +1,941 @@
+apiVersion: logging.qubership.org/v1alpha1
+kind: LoggingService
+metadata:
+  name: {{ .Values.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.name }}
+    app.kubernetes.io/component: logging-operator
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.labels }}
+    {{- toYaml .Values.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if or .Values.cloudEventsReader .Values.monitoringAgentLoggingPlugin }}
+  cloudURL: {{ .Values.cloudURL }}
+  {{- end }}
+  openshiftDeploy: {{ .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
+  osKind: {{ default "centos" .Values.osKind }}
+  ipv6: {{ default false .Values.ipv6 }}
+  containerRuntimeType: {{ .Values.containerRuntimeType }}
+  {{- if .Values.graylog.install }}
+  graylog:
+    dockerImage: {{ template "graylog.image" . }}
+    initSetupImage: {{ template "init-setup.image" . }}
+    mongoDBImage: {{ template "mongodb.image" . }}
+    initContainerDockerImage: {{ template "graylog-plugins-init.image" . }}
+    {{- if .Values.graylog.logLevel }}
+    logLevel: {{ .Values.graylog.logLevel }}
+    {{- end }}
+    {{- if  .Values.graylog.indexShards }}
+    indexShards: {{ .Values.graylog.indexShards }}
+    {{- end }}
+    {{- if .Values.graylog.indexReplicas }}
+    indexReplicas: {{ .Values.graylog.indexReplicas }}
+    {{- end }}
+    {{- if .Values.graylog.priorityClassName }}
+    priorityClassName: {{ .Values.graylog.priorityClassName }}
+    {{- end }}
+    host: {{ include "graylog.host" . }}
+    inputPort: {{ default 12201 .Values.graylog.inputPort }}
+    {{- if .Values.graylog.graylogResources }}
+    graylogResources:
+      requests:
+        cpu: {{ .Values.graylog.graylogResources.requests.cpu }}
+        memory: {{ .Values.graylog.graylogResources.requests.memory }}
+      limits:
+        cpu: {{ .Values.graylog.graylogResources.limits.cpu }}
+        memory: {{ .Values.graylog.graylogResources.limits.memory }}
+    {{- end }}
+    {{- if .Values.graylog.mongoResources }}
+    mongoResources:
+      requests:
+        cpu: {{ .Values.graylog.mongoResources.requests.cpu }}
+        memory: {{ .Values.graylog.mongoResources.requests.memory }}
+      limits:
+        cpu: {{ .Values.graylog.mongoResources.limits.cpu }}
+        memory: {{ .Values.graylog.mongoResources.limits.memory }}
+    {{- end }}
+    {{- if .Values.graylog.initResources }}
+    initResources:
+      requests:
+        cpu: {{ .Values.graylog.initResources.requests.cpu }}
+        memory: {{ .Values.graylog.initResources.requests.memory }}
+      limits:
+        cpu: {{ .Values.graylog.initResources.limits.cpu }}
+        memory: {{ .Values.graylog.initResources.limits.memory }}
+    {{- end }}
+    {{- if and .Values.graylog.nodeSelectorKey .Values.graylog.nodeSelectorValue }}
+    nodeSelectorKey: {{ .Values.graylog.nodeSelectorKey }}
+    nodeSelectorValue: {{ .Values.graylog.nodeSelectorValue }}
+    {{- end }}
+    graylogSecretName: {{ default "graylog-secret" .Values.graylog.graylogSecretName }}
+    contentDeployPolicy: {{ default "only-create" .Values.graylog.contentDeployPolicy }}
+    {{- if .Values.graylog.logsRotationSizeGb }}
+    logsRotationSizeGb: {{ .Values.graylog.logsRotationSizeGb }}
+    {{- end }}
+    {{- if .Values.graylog.maxNumberOfIndices }}
+    maxNumberOfIndices: {{ default 20 .Values.graylog.maxNumberOfIndices }}
+    {{- end }}
+    {{- if .Values.graylog.maxSize }}
+    maxSize: {{ default 1073741824 .Values.graylog.maxSize }}
+    {{- end }}
+    {{- if .Values.graylog.javaOpts }}
+    javaOpts: {{ .Values.graylog.javaOpts }}
+    {{- end }}
+    {{- if .Values.graylog.contentPackPaths }}
+    contentPackPaths: {{ .Values.graylog.contentPackPaths }}
+    {{- end }}
+    {{- if .Values.graylog.contentPack }}
+    contentPacks:
+      {{- toYaml .Values.graylog.contentPack | nindent 6 }}
+    {{- end }}
+    {{- if .Values.graylog.customPluginsPaths }}
+    customPluginsPaths: {{ .Values.graylog.customPluginsPaths }}
+    {{- end }}
+    {{- if .Values.graylog.labels }}
+    labels:
+      {{- toYaml .Values.graylog.labels | nindent 6 }}
+    {{- end }}
+    {{- if .Values.graylog.annotations }}
+    annotations:
+      {{- toYaml .Values.graylog.annotations | nindent 6 }}
+    {{- end }}
+    {{- if .Values.graylog.startupTimeout }}
+    startupTimeout: {{ .Values.graylog.startupTimeout }}
+    {{- end }}
+    {{- if .Values.graylog.ringSize }}
+    ringSize: {{ .Values.graylog.ringSize }}
+    {{- end }}
+    {{- if .Values.graylog.inputbufferRingSize }}
+    inputbufferRingSize: {{ .Values.graylog.inputbufferRingSize }}
+    {{- end }}
+    {{- if .Values.graylog.inputbufferProcessors }}
+    inputbufferProcessors: {{ .Values.graylog.inputbufferProcessors }}
+    {{- end }}
+    {{- if .Values.graylog.processbufferProcessors }}
+    processbufferProcessors: {{ .Values.graylog.processbufferProcessors }}
+    {{- end }}
+    {{- if .Values.graylog.outputbufferProcessors }}
+    outputbufferProcessors: {{ .Values.graylog.outputbufferProcessors }}
+    {{- end }}
+    {{- if .Values.graylog.outputbufferProcessorThreadsMaxPoolSize }}
+    outputbufferProcessorThreadsMaxPoolSize: {{ .Values.graylog.outputbufferProcessorThreadsMaxPoolSize }}
+    {{- end }}
+    {{- if .Values.graylog.outputBatchSize }}
+    outputBatchSize: {{ .Values.graylog.outputBatchSize }}
+    {{- end }}
+    {{- if .Values.graylog.elasticsearchMaxTotalConnections }}
+    elasticsearchMaxTotalConnections: {{ .Values.graylog.elasticsearchMaxTotalConnections }}
+    {{- end }}
+    {{- if .Values.graylog.elasticsearchMaxTotalConnectionsPerRoute }}
+    elasticsearchMaxTotalConnectionsPerRoute: {{ .Values.graylog.elasticsearchMaxTotalConnectionsPerRoute }}
+    {{- end }}
+    {{- if .Values.graylog.streams }}
+    streams:
+    {{- toYaml .Values.graylog.streams | nindent 6 }}
+    {{- else }}
+    streams:
+      - name: "System logs"
+        install: true
+        rotationStrategy: "sizeBased"
+        maxSize: 1073741824
+      - name: "Audit logs"
+        install: true
+        rotationStrategy: "timeBased"
+        rotationPeriod: "P1M"
+        maxNumberOfIndices: 5
+      - name: "Kubernetes events"
+        install: true
+        rotationStrategy: "timeBased"
+        rotationPeriod: "P1M"
+        maxNumberOfIndices: 5
+    {{- end }}
+    {{- if .Values.graylog.tls }}
+    tls:
+      {{- if .Values.graylog.tls.http }}
+      http:
+        enabled: {{ default false .Values.graylog.tls.http.enabled }}
+        {{- if .Values.graylog.tls.http.generateCerts }}
+        generateCerts:
+          enabled: {{ default false .Values.graylog.tls.http.generateCerts.enabled }}
+          secretName: {{ default "graylog-http-cert-manager-tls" .Values.graylog.tls.http.generateCerts.secretName }}
+        {{- end }}
+        {{- if .Values.graylog.tls.http.cacerts }}
+        cacerts: {{ .Values.graylog.tls.http.cacerts }}
+        {{- end }}
+        {{- if .Values.graylog.tls.http.cert }}
+        cert:
+          secretKey: {{ .Values.graylog.tls.http.cert.secretKey }}
+          secretName: {{ .Values.graylog.tls.http.cert.secretName }}
+        {{- end }}
+        {{- if .Values.graylog.tls.http.key }}
+        key:
+          secretKey: {{ .Values.graylog.tls.http.key.secretKey }}
+          secretName: {{ .Values.graylog.tls.http.key.secretName }}
+        {{- end }}
+        {{- if .Values.graylog.tls.http.keyFilePassword }}
+        keyFilePassword: {{ .Values.graylog.tls.http.keyFilePassword }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.graylog.tls.input }}
+      input:
+        enabled: {{ default false .Values.graylog.tls.input.enabled }}
+        {{- if .Values.graylog.tls.input.generateCerts }}
+        generateCerts:
+          enabled: {{ default false .Values.graylog.tls.input.generateCerts.enabled }}
+          secretName: {{ default "graylog-input-cert-manager-tls" .Values.graylog.tls.input.generateCerts.secretName }}
+        {{- end }}
+        {{- if .Values.graylog.tls.input.cert }}
+        cert:
+          secretKey: {{ .Values.graylog.tls.input.cert.secretKey }}
+          secretName: {{ .Values.graylog.tls.input.cert.secretName }}
+        {{- end }}
+        {{- if .Values.graylog.tls.input.key }}
+        key:
+          secretKey: {{ .Values.graylog.tls.input.key.secretKey }}
+          secretName: {{ .Values.graylog.tls.input.key.secretName }}
+        {{- end }}
+        {{- if .Values.graylog.tls.input.keyFilePassword }}
+        keyFilePassword: {{ .Values.graylog.tls.input.keyFilePassword }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.graylog.openSearch }}
+    openSearch:
+      {{- toYaml .Values.graylog.openSearch | nindent 6 }}
+    {{- end }}
+    {{- if .Values.graylog.authProxy }}
+    authProxy:
+      install: {{ .Values.graylog.authProxy.install }}
+      {{- if and (eq .Values.graylog.authProxy.authType "ldap") .Values.graylog.authProxy.ldap }}
+      {{- if .Values.graylog.authProxy.ldap.bindPasswordSecret }}
+      bindPasswordSecret:
+        {{- toYaml .Values.graylog.authProxy.ldap.bindPasswordSecret | nindent 8 }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.ldap.ca }}
+      ca:
+        secretKey: {{ .Values.graylog.authProxy.ldap.ca.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.ldap.ca.secretName }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.ldap.cert }}
+      cert:
+        secretKey: {{ .Values.graylog.authProxy.ldap.cert.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.ldap.cert.secretName }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.ldap.key }}
+      key:
+        secretKey: {{ .Values.graylog.authProxy.ldap.key.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.ldap.key.secretName }}
+      {{- end }}
+      {{- end }}
+      {{- if and (eq .Values.graylog.authProxy.authType "oauth") .Values.graylog.authProxy.oauth }}
+      {{- if .Values.graylog.authProxy.oauth.clientCredentialsSecret }}
+      bindPasswordSecret:
+        {{- toYaml .Values.graylog.authProxy.oauth.clientCredentialsSecret | nindent 8 }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.oauth.ca }}
+      ca:
+        secretKey: {{ .Values.graylog.authProxy.oauth.ca.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.oauth.ca.secretName }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.oauth.cert }}
+      cert:
+        secretKey: {{ .Values.graylog.authProxy.oauth.cert.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.oauth.cert.secretName }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.oauth.key }}
+      key:
+        secretKey: {{ .Values.graylog.authProxy.oauth.key.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.oauth.key.secretName }}
+      {{- end }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.resources }}
+      resources:
+        requests:
+          cpu: {{ default "100m" .Values.graylog.authProxy.resources.requests.cpu }}
+          memory: {{ default "128Mi" .Values.graylog.authProxy.resources.requests.memory }}
+        limits:
+          cpu: {{ default "200m" .Values.graylog.authProxy.resources.limits.cpu }}
+          memory: {{ default "512Mi" .Values.graylog.authProxy.resources.limits.memory }}
+      {{- end }}
+      image: {{ template "authProxy.image" . }}
+      {{- if .Values.graylog.authProxy.ca }}
+      ca:
+        secretKey: {{ .Values.graylog.authProxy.ca.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.ca.secretName }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.cert }}
+      cert:
+        secretKey: {{ .Values.graylog.authProxy.cert.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.cert.secretName }}
+      {{- end }}
+      {{- if .Values.graylog.authProxy.key }}
+      key:
+        secretKey: {{ .Values.graylog.authProxy.key.secretKey }}
+        secretName: {{ .Values.graylog.authProxy.key.secretName }}
+      {{- end }}
+    {{- end }}
+    {{- if and .Values.graylog.mongoUpgrade (include "graylog.isMajorVersion5" . ) }}
+    mongoDBUpgrade:
+      mongoDBImage40: {{ template "mongodb40.image" . }}
+      mongoDBImage42: {{ template "mongodb42.image" . }}
+      mongoDBImage44: {{ template "mongodb44.image" . }}
+    {{- end }}
+    pathRepo: {{ default "/ush/share/opensearch/snapshots/graylog/" .Values.graylog.pathRepo }}
+    s3Archive: {{ default false .Values.graylog.s3Archive }}
+  {{- end }}
+  {{- if .Values.fluentd.install }}
+  fluentd:
+    dockerImage: {{ template "fluentd.image" . }}
+    configmapReload:
+      dockerImage: {{ template "fluentd.configmapReload.image" . }}
+      {{- if .Values.fluentd.configmapReload.resources }}
+      resources:
+        {{- if .Values.fluentd.configmapReload.resources.requests }}
+        requests:
+          cpu: {{ .Values.fluentd.configmapReload.resources.requests.cpu }}
+          memory: {{ .Values.fluentd.configmapReload.resources.requests.memory }}
+        {{- end }}
+        {{- if .Values.fluentd.configmapReload.resources.limits }}
+        limits:
+          cpu: {{ .Values.fluentd.configmapReload.resources.limits.cpu }}
+          memory: {{ .Values.fluentd.configmapReload.resources.limits.memory }}
+        {{- end }}
+      {{- end }}
+    {{- if .Values.fluentd.logLevel }}
+    logLevel: {{ .Values.fluentd.logLevel }}
+    {{- end }}
+    systemLogging: {{ .Values.fluentd.systemLogging }}
+    {{- if .Values.fluentd.excludePath }}
+    excludePath:
+      {{- toYaml .Values.fluentd.excludePath | nindent 6 }}
+    {{- end }} 
+    {{- if .Values.fluentd.systemLogType }}
+    systemLogType: {{ .Values.fluentd.systemLogType }}
+    {{- else }}
+    systemLogType: varlogmessages
+    {{- end }}
+    systemAuditLogging: {{ .Values.fluentd.systemAuditLogging }}
+    kubeAuditLogging: {{ .Values.fluentd.kubeAuditLogging }}
+    kubeApiserverAuditLogging: {{ .Values.fluentd.kubeApiserverAuditLogging }}
+    containerLogging: {{ .Values.fluentd.containerLogging }}
+    {{- if .Values.fluentd.priorityClassName }}
+    priorityClassName: {{ .Values.fluentd.priorityClassName }}
+    {{- end }}
+    {{- if .Values.fluentd.resources }}
+    resources:
+      {{- if .Values.fluentd.resources.requests }}
+      requests:
+        cpu: {{ .Values.fluentd.resources.requests.cpu }}
+        memory: {{ .Values.fluentd.resources.requests.memory }}
+      {{- end }}
+      {{- if .Values.fluentd.resources.limits }}
+      limits:
+        cpu: {{ .Values.fluentd.resources.limits.cpu }}
+        memory: {{ .Values.fluentd.resources.limits.memory }}
+      {{- end }}
+    {{- end }}
+    {{- if and .Values.fluentd.nodeSelectorKey .Values.fluentd.nodeSelectorValue }}
+    nodeSelectorKey: {{ .Values.fluentd.nodeSelectorKey }}
+    nodeSelectorValue: {{ .Values.fluentd.nodeSelectorValue }}
+    {{- end }}
+    securityContextPrivileged: {{ .Values.fluentd.securityContextPrivileged }}
+    {{- if or .Values.fluentd.graylogOutput (eq (.Values.fluentd.graylogOutput | toString) "<nil>") }}
+    graylogOutput: true
+    {{- if .Values.fluentd.graylogHost }}
+    graylogHost: {{ .Values.fluentd.graylogHost }}
+    {{- end }}
+    {{- if .Values.fluentd.graylogPort }}
+    graylogPort: {{ .Values.fluentd.graylogPort }}
+    {{- end }}
+    {{- if .Values.fluentd.graylogProtocol }}
+    graylogProtocol: {{ .Values.fluentd.graylogProtocol }}
+    {{- end }}
+    {{- if .Values.fluentd.graylogBufferFlushInterval }}
+    graylogBufferFlushInterval: {{ .Values.fluentd.graylogBufferFlushInterval }}
+    {{- end }}
+    {{- else }}
+    graylogOutput: false
+    {{- end }}
+    {{- if .Values.fluentd.compress }}
+    compress: {{ .Values.fluentd.compress }}
+    {{- end }}
+    {{- if .Values.fluentd.tls }}
+    tls:
+      enabled: {{ default false .Values.fluentd.tls.enabled }}
+      {{- if .Values.fluentd.tls.generateCerts }}
+      generateCerts:
+        enabled: {{ default false .Values.fluentd.tls.generateCerts.enabled }}
+        secretName: {{ default "fluentd-cert-manager-tls" .Values.fluentd.tls.generateCerts.secretName }}
+      {{- end }}
+      {{- if .Values.fluentd.tls.version }}
+      version: {{ .Values.fluentd.tls.version }}
+      {{- end }}
+      noDefaultCA: {{ default false .Values.fluentd.tls.noDefaultCA }}
+      {{- if .Values.fluentd.tls.ca }}
+      ca:
+        secretKey: {{ .Values.fluentd.tls.ca.secretKey }}
+        secretName: {{ .Values.fluentd.tls.ca.secretName }}
+      {{- end }}
+      {{- if .Values.fluentd.tls.cert }}
+      cert:
+        secretKey: {{ .Values.fluentd.tls.cert.secretKey }}
+        secretName: {{ .Values.fluentd.tls.cert.secretName }}
+      {{- end }}
+      {{- if .Values.fluentd.tls.key }}
+      key:
+        secretKey: {{ .Values.fluentd.tls.key.secretKey }}
+        secretName: {{ .Values.fluentd.tls.key.secretName }}
+      {{- end }}
+      allCiphers: {{ default true .Values.fluentd.tls.allCiphers }}
+      rescueSslErrors: {{ default false .Values.fluentd.tls.rescueSslErrors }}
+      noVerify: {{ default false .Values.fluentd.tls.noVerify }}
+    {{- end }}
+    {{- if .Values.fluentd.fileStorage }}
+    useFileStorage: {{ .Values.fluentd.fileStorage }}
+    {{- end }}
+    {{- if .Values.fluentd.queueLimitLength }}
+    queueLimitLength: {{ .Values.fluentd.queueLimitLength }}
+    {{- end }}
+    {{- if .Values.fluentd.totalLimitSize }}
+    totalLimitSize: {{ .Values.fluentd.totalLimitSize }}
+    {{- end }}
+    billCycleConf: {{ default false .Values.fluentd.billCycleConf }}
+    customInputConf: |-
+      {{ default "" .Values.fluentd.customInputConf | nindent 6 }}
+    customFilterConf: |-
+      {{ default "" .Values.fluentd.customFilterConf | nindent 6 }}
+    customOutputConf: |-
+      {{ default "" .Values.fluentd.customOutputConf | nindent 6 }}
+    {{- if .Values.fluentd.cloudEventsReaderFormat }}
+    cloudEventsReaderFormat: {{ .Values.fluentd.cloudEventsReaderFormat }}
+    {{- end }}
+    watchKubernetesMetadata: {{ default true .Values.fluentd.watchKubernetesMetadata }}
+    {{- if .Values.fluentd.labels }}
+    labels:
+      {{- toYaml .Values.fluentd.labels | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentd.annotations }}
+    annotations:
+      {{- toYaml .Values.fluentd.annotations | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentd.tolerations }}
+    tolerations:
+      {{- toYaml .Values.fluentd.tolerations | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentd.additionalVolumes }}
+    additionalVolumes:
+      {{- toYaml .Values.fluentd.additionalVolumes | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentd.additionalVolumeMounts }}
+    additionalVolumeMounts:
+      {{- toYaml .Values.fluentd.additionalVolumeMounts | nindent 6 }}
+    {{- end }}
+    multilineFirstLineRegexp: {{ default "/(^\\[\\d{4}\\-\\d{2}\\-\\d{2})|(^\\{\")|(^*0m\\d{2}\\:\\d{2}\\:\\d{2})/" .Values.fluentd.multilineFirstLineRegexp }}
+    {{- if .Values.fluentd.extraFields }}
+    extraFields:
+      {{- toYaml .Values.fluentd.extraFields | nindent 6 }}
+    {{- end }}
+    {{- if and .Values.fluentd.output  .Values.fluentd.output.loki }}
+    output:
+      loki:
+      {{- if .Values.fluentd.output.loki.enabled }}
+        enabled: true
+        host: {{ .Values.fluentd.output.loki.host | default "loki-write.loki.svc" }}
+        {{- if .Values.fluentd.output.loki.tenant }}
+        tenant: {{ .Values.fluentd.output.loki.tenant }}
+        {{- end }}
+        {{- if .Values.fluentd.output.loki.auth }}
+        {{- if .Values.fluentd.output.loki.auth.token }}
+        {{- if and .Values.fluentd.output.loki.auth.token.name .Values.fluentd.output.loki.auth.token.key }}
+        auth:
+          token:
+            name: {{ .Values.fluentd.output.loki.auth.token.name }}
+            key: {{ .Values.fluentd.output.loki.auth.token.key }}
+        {{- end }}
+        {{- else if and .Values.fluentd.output.loki.auth.user  .Values.fluentd.output.loki.auth.password }}
+        {{- if and .Values.fluentd.output.loki.auth.user.name .Values.fluentd.output.loki.auth.user.key .Values.fluentd.output.loki.auth.password.name .Values.fluentd.output.loki.auth.password.key }}
+        auth:
+          user:
+            name: {{ .Values.fluentd.output.loki.auth.user.name }}
+            key: {{ .Values.fluentd.output.loki.auth.user.key }}
+          password:
+            name: {{ .Values.fluentd.output.loki.auth.password.name }}
+            key: {{ .Values.fluentd.output.loki.auth.password.key }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.fluentd.output.loki.staticLabels }}
+        staticLabels: {{ toJson .Values.fluentd.output.loki.staticLabels | quote }}
+        {{- end }}
+        {{- if .Values.fluentd.output.loki.labelsMapping }}
+        labelsMapping: |-
+          {{ default "" .Values.fluentd.output.loki.labelsMapping | nindent 10 }}
+        {{- end }}
+        {{- if .Values.fluentd.output.loki.tls }}
+        tls:
+          enabled: {{ default false .Values.fluentd.output.loki.tls.enabled }}
+          {{- if .Values.fluentd.output.loki.tls.version }}
+          version: {{ .Values.fluentd.output.loki.tls.version }}
+          {{- end }}
+          noDefaultCA: {{ default false .Values.fluentd.output.loki.tls.noDefaultCA }}
+          {{- if .Values.fluentd.output.loki.tls.ca }}
+          ca:
+            secretKey: {{ .Values.fluentd.output.loki.tls.ca.secretKey }}
+            secretName: {{ .Values.fluentd.output.loki.tls.ca.secretName }}
+          {{- end }}
+          {{- if .Values.fluentd.output.loki.tls.cert }}
+          cert:
+            secretKey: {{ .Values.fluentd.output.loki.tls.cert.secretKey }}
+            secretName: {{ .Values.fluentd.output.loki.tls.cert.secretName }}
+          {{- end }}
+          {{- if .Values.fluentd.output.loki.tls.key }}
+          key:
+            secretKey: {{ .Values.fluentd.output.loki.tls.key.secretKey }}
+            secretName: {{ .Values.fluentd.output.loki.tls.key.secretName }}
+          {{- end }}
+          allCiphers: {{ default true .Values.fluentd.output.loki.tls.allCiphers }}
+          noVerify: {{ default false .Values.fluentd.output.loki.tls.noVerify }}
+        {{- end }}
+        {{- if .Values.fluentd.output.loki.extraParams }}
+        extraParams: |-
+          {{ default "" .Values.fluentd.output.loki.extraParams | nindent 10 }}
+        {{- end }}
+      {{- else }}
+        enabled: false
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.fluentbit.install }}
+  fluentbit:
+    dockerImage: {{ template "fluentbit.image" . }}
+    configmapReload:
+      dockerImage: {{ template "fluentbit.configmapReload.image" . }}
+      {{- if .Values.fluentbit.configmapReload.resources }}
+      resources:
+        {{- if .Values.fluentbit.configmapReload.resources.requests }}
+        requests:
+          cpu: {{ .Values.fluentbit.configmapReload.resources.requests.cpu }}
+          memory: {{ .Values.fluentbit.configmapReload.resources.requests.memory }}
+        {{- end }}
+        {{- if .Values.fluentbit.configmapReload.resources.limits }}
+        limits:
+          cpu: {{ .Values.fluentbit.configmapReload.resources.limits.cpu }}
+          memory: {{ .Values.fluentbit.configmapReload.resources.limits.memory }}
+        {{- end }}
+      {{- end }}
+    {{- if .Values.fluentbit.logLevel }}
+    logLevel: {{ .Values.fluentbit.logLevel }}
+    {{- end }}
+    {{- if .Values.fluentbit.excludePath }}
+    excludePath: {{ .Values.fluentbit.excludePath }}
+    {{- end }}
+    systemLogging: {{ .Values.fluentbit.systemLogging }}
+    {{- if .Values.fluentbit.systemLogType }}
+    systemLogType: {{ .Values.fluentbit.systemLogType }}
+    {{- else }}
+    systemLogType: varlogmessages
+    {{- end }}
+    systemAuditLogging: {{ .Values.fluentbit.systemAuditLogging }}
+    kubeAuditLogging: {{ .Values.fluentbit.kubeAuditLogging }}
+    kubeApiserverAuditLogging: {{ .Values.fluentbit.kubeApiserverAuditLogging }}
+    containerLogging: {{ .Values.fluentbit.containerLogging }}
+    {{- if .Values.fluentbit.priorityClassName }}
+    priorityClassName: {{ .Values.fluentbit.priorityClassName }}
+    {{- end }}
+    {{- if .Values.fluentbit.resources }}
+    resources:
+      {{- if .Values.fluentbit.resources.requests }}
+      requests:
+        cpu: {{ .Values.fluentbit.resources.requests.cpu }}
+        memory: {{ .Values.fluentbit.resources.requests.memory }}
+      {{- end }}
+      {{- if .Values.fluentbit.resources.limits }}
+      limits:
+        cpu: {{ .Values.fluentbit.resources.limits.cpu }}
+        memory: {{ .Values.fluentbit.resources.limits.memory }}
+      {{- end }}
+    {{- end }}
+    {{- if and .Values.fluentbit.nodeSelectorKey .Values.fluentbit.nodeSelectorValue }}
+    nodeSelectorKey: {{ .Values.fluentbit.nodeSelectorKey }}
+    nodeSelectorValue: {{ .Values.fluentbit.nodeSelectorValue }}
+    {{- end }}
+    securityContextPrivileged: {{ .Values.fluentbit.securityContextPrivileged }}
+    {{- if or .Values.fluentbit.graylogOutput (eq (.Values.fluentbit.graylogOutput | toString) "<nil>") }}
+    graylogOutput: true
+    {{- if .Values.fluentbit.graylogHost }}
+    graylogHost: {{ .Values.fluentbit.graylogHost }}
+    {{- end }}
+    {{- if .Values.fluentbit.graylogPort }}
+    graylogPort: {{ .Values.fluentbit.graylogPort }}
+    {{- end }}
+    {{- if .Values.fluentbit.graylogProtocol }}
+    graylogProtocol: {{ .Values.fluentbit.graylogProtocol }}
+    {{- end }}
+    {{- else }}
+    graylogOutput: false
+    {{- end }}
+    {{- if .Values.fluentbit.tls }}
+    tls:
+      enabled: {{ default false .Values.fluentbit.tls.enabled }}
+      {{- if .Values.fluentbit.tls.generateCerts }}
+      generateCerts:
+        enabled: {{ default false .Values.fluentbit.tls.generateCerts.enabled }}
+        secretName: {{ default "fluentbit-cert-manager-tls" .Values.fluentbit.tls.generateCerts.secretName }}
+      {{- end }}
+      {{- if .Values.fluentbit.tls.ca }}
+      ca:
+        secretKey: {{ .Values.fluentbit.tls.ca.secretKey }}
+        secretName: {{ .Values.fluentbit.tls.ca.secretName }}
+      {{- end }}
+      {{- if .Values.fluentbit.tls.cert }}
+      cert:
+        secretKey: {{ .Values.fluentbit.tls.cert.secretKey }}
+        secretName: {{ .Values.fluentbit.tls.cert.secretName }}
+      {{- end }}
+      {{- if .Values.fluentbit.tls.key }}
+      key:
+        secretKey: {{ .Values.fluentbit.tls.key.secretKey }}
+        secretName: {{ .Values.fluentbit.tls.key.secretName }}
+      {{- end }}
+      verify: {{ default false .Values.fluentbit.tls.verify }}
+      {{- if .Values.fluentbit.tls.keyPasswd }}
+      keyPasswd: {{ .Values.fluentbit.tls.keyPasswd }}
+      {{- end }}
+    {{- end }}
+    {{- if .Values.fluentbit.memBufLimit }}
+    memBufLimit: {{ .Values.fluentbit.memBufLimit }}
+    {{- end }}
+    {{- if .Values.fluentbit.totalLimitSize }}
+    totalLimitSize: {{ .Values.fluentbit.totalLimitSize }}
+    {{- end }}
+    billCycleConf: {{ default false .Values.fluentbit.billCycleConf }}
+    customInputConf: |-
+      {{ .Values.fluentbit.customInputConf |  default "" | nindent 6 }}
+    customFilterConf: |-
+      {{ .Values.fluentbit.customFilterConf | default "" | nindent 6 }}
+    customOutputConf: |-
+      {{ .Values.fluentbit.customOutputConf | default "" | nindent 6 }}
+    customLuaScriptConf:
+      {{- toYaml .Values.fluentbit.customLuaScriptConf | nindent 6 }}
+    watchKubernetesMetadata: {{ default true .Values.fluentbit.watchKubernetesMetadata }}
+    {{- if .Values.fluentbit.labels }}
+    labels:
+      {{- toYaml .Values.fluentbit.labels | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentbit.annotations }}
+    annotations:
+      {{- toYaml .Values.fluentbit.annotations | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentbit.tolerations }}
+    tolerations:
+      {{- toYaml .Values.fluentbit.tolerations | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentbit.additionalVolumes }}
+    additionalVolumes:
+      {{- toYaml .Values.fluentbit.additionalVolumes | nindent 6 }}
+    {{- end }}
+    {{- if .Values.fluentbit.additionalVolumeMounts }}
+    additionalVolumeMounts:
+      {{- toYaml .Values.fluentbit.additionalVolumeMounts | nindent 6 }}
+    {{- end }}
+    multilineFirstLineRegexp: {{ default "/^(\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/" .Values.fluentbit.multilineFirstLineRegexp }}
+    multilineOtherLinesRegexp: {{ default "/^(?!\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/" .Values.fluentbit.multilineOtherLinesRegexp }}
+    {{- if .Values.fluentbit.extraFields }}
+    extraFields:
+      {{- toYaml .Values.fluentbit.extraFields | nindent 6 }}
+    {{- end }}
+    {{- if and .Values.fluentbit.output  .Values.fluentbit.output.loki }}
+    output:
+      loki:
+      {{- if .Values.fluentbit.output.loki.enabled }}
+        enabled: true
+        host: {{ .Values.fluentbit.output.loki.host | default "loki-write.loki.svc" }}
+        {{- if .Values.fluentbit.output.loki.tenant }}
+        tenant: {{ .Values.fluentbit.output.loki.tenant }}
+        {{- end }}
+        {{- if .Values.fluentbit.output.loki.auth }}
+        {{- if .Values.fluentbit.output.loki.auth.token }}
+        {{- if and .Values.fluentbit.output.loki.auth.token.name .Values.fluentbit.output.loki.auth.token.key }}
+        auth:
+          token:
+            name: {{ .Values.fluentbit.output.loki.auth.token.name }}
+            key: {{ .Values.fluentbit.output.loki.auth.token.key }}
+        {{- end }}
+        {{- else if and .Values.fluentbit.output.loki.auth.user .Values.fluentbit.output.loki.auth.password }}
+        {{- if and .Values.fluentbit.output.loki.auth.user.name .Values.fluentbit.output.loki.auth.user.key .Values.fluentbit.output.loki.auth.password.name .Values.fluentbit.output.loki.auth.password.key }}
+        auth:
+          user:
+            name: {{ .Values.fluentbit.output.loki.auth.user.name }}
+            key: {{ .Values.fluentbit.output.loki.auth.user.key }}
+          password:
+            name: {{ .Values.fluentbit.output.loki.auth.password.name }}
+            key: {{ .Values.fluentbit.output.loki.auth.password.key }}
+        {{- end }}
+        {{- end }}
+        {{- end }}
+        {{- if .Values.fluentbit.output.loki.staticLabels }}
+        staticLabels: {{ .Values.fluentbit.output.loki.staticLabels }}
+        {{- end }}
+        {{- if .Values.fluentbit.output.loki.labelsMapping }}
+        labelsMapping: |-
+          {{ default "" .Values.fluentbit.output.loki.labelsMapping | nindent 10 }}
+        {{- end }}
+        {{- if .Values.fluentbit.output.loki.tls }}
+        tls:
+          enabled: {{ default false .Values.fluentbit.output.loki.tls.enabled }}
+          {{- if .Values.fluentbit.output.loki.tls.ca }}
+          ca:
+            secretKey: {{ .Values.fluentbit.output.loki.tls.ca.secretKey }}
+            secretName: {{ .Values.fluentbit.output.loki.tls.ca.secretName }}
+          {{- end }}
+          {{- if .Values.fluentbit.output.loki.tls.cert }}
+          cert:
+            secretKey: {{ .Values.fluentbit.output.loki.tls.cert.secretKey }}
+            secretName: {{ .Values.fluentbit.output.loki.tls.cert.secretName }}
+          {{- end }}
+          {{- if .Values.fluentbit.output.loki.tls.key }}
+          key:
+            secretKey: {{ .Values.fluentbit.output.loki.tls.key.secretKey }}
+            secretName: {{ .Values.fluentbit.output.loki.tls.key.secretName }}
+          {{- end }}
+          verify: {{ default false .Values.fluentbit.output.loki.tls.verify }}
+          {{- if .Values.fluentbit.output.loki.tls.keyPasswd }}
+          keyPasswd: {{ .Values.fluentbit.output.loki.tls.keyPasswd }}
+          {{- end }}
+        {{- end }}
+        {{- if .Values.fluentbit.output.loki.extraParams }}
+        extraParams: |-
+          {{ default "" .Values.fluentbit.output.loki.extraParams | nindent 10 }}
+        {{- end }}
+      {{- else }}
+        enabled: false
+      {{- end }}
+    {{- end }}
+    {{- if .Values.fluentbit.aggregator }}
+    aggregator:
+      install: {{ .Values.fluentbit.aggregator.install }}
+      {{- if .Values.fluentbit.aggregator.replicas }}
+      replicas: {{ .Values.fluentbit.aggregator.replicas }}
+      {{- end }}
+      dockerImage: {{ template "fluentbit.image" . }}
+      configmapReload:
+        dockerImage: {{ template "fluentbit.configmapReload.image" . }}
+        {{- if .Values.fluentbit.aggregator.configmapReload.resources }}
+        resources:
+          {{- if .Values.fluentbit.aggregator.configmapReload.resources.requests }}
+          requests:
+            cpu: {{ .Values.fluentbit.aggregator.configmapReload.resources.requests.cpu }}
+            memory: {{ .Values.fluentbit.aggregator.configmapReload.resources.requests.memory }}
+          {{- end }}
+          {{- if .Values.fluentbit.aggregator.configmapReload.resources.limits }}
+          limits:
+            cpu: {{ .Values.fluentbit.aggregator.configmapReload.resources.limits.cpu }}
+            memory: {{ .Values.fluentbit.aggregator.configmapReload.resources.limits.memory }}
+          {{- end }}
+        {{- end }}
+      {{- if .Values.fluentbit.aggregator.priorityClassName }}
+      priorityClassName: {{ .Values.fluentbit.aggregator.priorityClassName }}
+      {{- end }}
+      resources:
+        requests:
+          cpu: {{ default "500m" .Values.fluentbit.aggregator.resources.requests.cpu }}
+          memory: {{ default "512Mi" .Values.fluentbit.aggregator.resources.requests.memory }}
+        limits:
+          cpu: {{ default "2" .Values.fluentbit.aggregator.resources.limits.cpu }}
+          memory: {{ default "1Gi" .Values.fluentbit.aggregator.resources.limits.memory }}
+      {{- if and .Values.fluentbit.aggregator.nodeSelectorKey .Values.fluentbit.aggregator.nodeSelectorValue }}
+      nodeSelectorKey: {{ .Values.fluentbit.aggregator.nodeSelectorKey }}
+      nodeSelectorValue: {{ .Values.fluentbit.aggregator.nodeSelectorValue }}
+      {{- end }}
+      {{- if or .Values.fluentbit.aggregator.graylogOutput (eq (.Values.fluentbit.aggregator.graylogOutput | toString) "<nil>") }}
+      graylogOutput: true
+      {{- if .Values.fluentbit.aggregator.graylogHost }}
+      graylogHost: {{ .Values.fluentbit.aggregator.graylogHost }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.graylogPort }}
+      graylogPort: {{ .Values.fluentbit.aggregator.graylogPort }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.graylogProtocol }}
+      graylogProtocol: {{ .Values.fluentbit.aggregator.graylogProtocol }}
+      {{- end }}
+      {{- else }}
+      graylogOutput: false
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.tls }}
+      tls:
+        enabled: {{ default false .Values.fluentbit.aggregator.tls.enabled }}
+        {{- if .Values.fluentbit.aggregator.tls.generateCerts }}
+        generateCerts:
+          enabled: {{ default false .Values.fluentbit.aggregator.tls.generateCerts.enabled }}
+          secretName: {{ default "fluentbit-aggregator-cert-manager-tls" .Values.fluentbit.aggregator.tls.generateCerts.secretName }}
+        {{- end }}
+        {{- if .Values.fluentbit.aggregator.tls.ca }}
+        ca:
+          secretKey: {{ .Values.fluentbit.aggregator.tls.ca.secretKey }}
+          secretName: {{ .Values.fluentbit.aggregator.tls.ca.secretName }}
+        {{- end }}
+        {{- if .Values.fluentbit.aggregator.tls.cert }}
+        cert:
+          secretKey: {{ .Values.fluentbit.aggregator.tls.cert.secretKey }}
+          secretName: {{ .Values.fluentbit.aggregator.tls.cert.secretName }}
+        {{- end }}
+        {{- if .Values.fluentbit.aggregator.tls.key }}
+        key:
+          secretKey: {{ .Values.fluentbit.aggregator.tls.key.secretKey }}
+          secretName: {{ .Values.fluentbit.aggregator.tls.key.secretName }}
+        {{- end }}
+        verify: {{ default false .Values.fluentbit.aggregator.tls.verify }}
+        {{- if .Values.fluentbit.aggregator.tls.keyPasswd }}
+        keyPasswd: {{ .Values.fluentbit.aggregator.tls.keyPasswd }}
+        {{- end }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.memBufLimit }}
+      memBufLimit: {{ .Values.fluentbit.aggregator.memBufLimit }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.totalLimitSize }}
+      totalLimitSize: {{ .Values.fluentbit.aggregator.totalLimitSize }}
+      {{- end }}
+      customFilterConf: |-
+        {{ default "" .Values.fluentbit.aggregator.customFilterConf | nindent 8 }}
+      customOutputConf: |-
+        {{ default "" .Values.fluentbit.aggregator.customOutputConf | nindent 8 }}
+      customLuaScriptConf:
+        {{- toYaml .Values.fluentbit.aggregator.customLuaScriptConf | nindent 8 }}
+      {{- if .Values.fluentbit.aggregator.labels }}
+      labels:
+        {{- toYaml .Values.fluentbit.aggregator.labels | nindent 8 }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.annotations }}
+      annotations:
+        {{- toYaml .Values.fluentbit.aggregator.annotations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.tolerations }}
+      tolerations:
+        {{- toYaml .Values.fluentbit.aggregator.tolerations | nindent 8 }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.startupTimeout }}
+      startupTimeout: {{ .Values.fluentbit.aggregator.startupTimeout }}
+      {{- end }}
+      {{- if .Values.fluentbit.aggregator.volume }}
+      volume:
+        bind: {{ default false .Values.fluentbit.aggregator.volume.bind }}
+        storageClassName: {{ default "" .Values.fluentbit.aggregator.volume.storageClassName }}
+        storageSize: {{ default "2Gi" .Values.fluentbit.aggregator.volume.storageSize }}
+      {{- end }}
+      multilineFirstLineRegexp: {{ default "/^(\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/" .Values.fluentbit.aggregator.multilineFirstLineRegexp }}
+      multilineOtherLinesRegexp: {{ default "/^(?!\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/" .Values.fluentbit.aggregator.multilineOtherLinesRegexp }}
+      {{- if .Values.fluentbit.aggregator.extraFields }}
+      extraFields:
+        {{- toYaml .Values.fluentbit.aggregator.extraFields | nindent 8 }}
+      {{- end }}
+      {{- if and .Values.fluentbit.aggregator.output  .Values.fluentbit.aggregator.output.loki }}
+      output:
+        loki:
+        {{- if .Values.fluentbit.aggregator.output.loki.enabled }}
+          enabled: true
+          host: {{ .Values.fluentbit.aggregator.output.loki.host | default "loki-write.loki.svc" }}
+          {{- if .Values.fluentbit.aggregator.output.loki.tenant }}
+          tenant: {{ .Values.fluentbit.aggregator.output.loki.tenant }}
+          {{- end }}
+          {{- if .Values.fluentbit.aggregator.output.loki.auth }}
+          {{- if .Values.fluentbit.aggregator.output.loki.auth.token }}
+          {{- if and .Values.fluentbit.aggregator.output.loki.auth.token.name .Values.fluentbit.aggregator.output.loki.auth.token.key }}
+          auth:
+            token:
+              name: {{ .Values.fluentbit.aggregator.output.loki.auth.token.name }}
+              key: {{ .Values.fluentbit.aggregator.output.loki.auth.token.key }}
+          {{- end }}
+          {{- else if and .Values.fluentbit.aggregator.output.loki.auth.user .Values.fluentbit.aggregator.output.loki.auth.password }}
+          {{- if and .Values.fluentbit.aggregator.output.loki.auth.user.name .Values.fluentbit.aggregator.output.loki.auth.user.key .Values.fluentbit.aggregator.output.loki.auth.password.name .Values.fluentbit.aggregator.output.loki.auth.password.key }}
+          auth:
+            user:
+              name: {{ .Values.fluentbit.aggregator.output.loki.auth.user.name }}
+              key: {{ .Values.fluentbit.aggregator.output.loki.auth.user.key }}
+            password:
+              name: {{ .Values.fluentbit.aggregator.output.loki.auth.password.name }}
+              key: {{ .Values.fluentbit.aggregator.output.loki.auth.password.key }}
+          {{- end }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.fluentbit.aggregator.output.loki.staticLabels }}
+          staticLabels: {{ .Values.fluentbit.aggregator.output.loki.staticLabels }}
+          {{- end }}
+          {{- if .Values.fluentbit.aggregator.output.loki.labelsMapping }}
+          labelsMapping: |-
+            {{ default "" .Values.fluentbit.aggregator.output.loki.labelsMapping | nindent 12 }}
+          {{- end }}
+          {{- if .Values.fluentbit.aggregator.output.loki.tls }}
+          tls:
+            enabled: {{ default false .Values.fluentbit.aggregator.output.loki.tls.enabled }}
+            {{- if .Values.fluentbit.aggregator.output.loki.tls.ca }}
+            ca:
+              secretKey: {{ .Values.fluentbit.aggregator.output.loki.tls.ca.secretKey }}
+              secretName: {{ .Values.fluentbit.aggregator.output.loki.tls.ca.secretName }}
+            {{- end }}
+            {{- if .Values.fluentbit.aggregator.output.loki.tls.cert }}
+            cert:
+              secretKey: {{ .Values.fluentbit.aggregator.output.loki.tls.cert.secretKey }}
+              secretName: {{ .Values.fluentbit.aggregator.output.loki.tls.cert.secretName }}
+            {{- end }}
+            {{- if .Values.fluentbit.aggregator.output.loki.tls.key }}
+            key:
+              secretKey: {{ .Values.fluentbit.aggregator.output.loki.tls.key.secretKey }}
+              secretName: {{ .Values.fluentbit.aggregator.output.loki.tls.key.secretName }}
+            {{- end }}
+            verify: {{ default false .Values.fluentbit.aggregator.output.loki.tls.verify }}
+            {{- if .Values.fluentbit.aggregator.output.loki.tls.keyPasswd }}
+            keyPasswd: {{ .Values.fluentbit.aggregator.output.loki.tls.keyPasswd }}
+            {{- end }}
+          {{- end }}
+          {{- if .Values.fluentbit.aggregator.output.loki.extraParams }}
+          extraParams: |-
+            {{ default "" .Values.fluentbit.aggregator.output.loki.extraParams | nindent 12 }}
+          {{- end }}
+        {{- else }}
+          enabled: false
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end }}
+  {{- if .Values.cloudEventsReader.install }}
+  cloudEventsReader:
+    install: {{ .Values.cloudEventsReader.install }}
+    dockerImage: {{ template "cloud-events-reader.image" . }}
+    {{- if .Values.cloudEventsReader.priorityClassName }}
+    priorityClassName: {{ .Values.cloudEventsReader.priorityClassName }}
+    {{- end }}
+    {{- if .Values.cloudEventsReader.args }}
+    args:
+      {{- toYaml .Values.cloudEventsReader.args | nindent 6 }}
+    {{- end }}
+    {{- if .Values.cloudEventsReader.resources }}
+    resources:
+      {{- if .Values.cloudEventsReader.resources.requests }}
+      requests:
+        cpu: {{ .Values.cloudEventsReader.resources.requests.cpu }}
+        memory: {{ .Values.cloudEventsReader.resources.requests.memory }}
+      {{- end }}
+      {{- if .Values.cloudEventsReader.resources.limits }}
+      limits:
+        cpu: {{ .Values.cloudEventsReader.resources.limits.cpu }}
+        memory: {{ .Values.cloudEventsReader.resources.limits.memory }}
+      {{- end }}
+    {{- end }}
+    {{- if and .Values.cloudEventsReader.nodeSelectorKey .Values.cloudEventsReader.nodeSelectorValue }}
+    nodeSelectorKey: {{ .Values.cloudEventsReader.nodeSelectorKey }}
+    nodeSelectorValue: {{ .Values.cloudEventsReader.nodeSelectorValue }}
+    {{- end }}
+    {{- if .Values.cloudEventsReader.labels }}
+    labels:
+      {{- toYaml .Values.cloudEventsReader.labels | nindent 6 }}
+    {{- end }}
+    {{- if .Values.cloudEventsReader.annotations }}
+    annotations:
+      {{- toYaml .Values.cloudEventsReader.annotations | nindent 6 }}
+    {{- end }}
+  {{- end }}

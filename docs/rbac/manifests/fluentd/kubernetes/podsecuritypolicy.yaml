@@ -1,0 +1,46 @@
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  annotations:
+    kubernetes.io/description: logging-fluentd psp is used for the fluentd daemonset
+  name: logging-fluentd
+  labels:
+    name: logging-fluentd
+    app.kubernetes.io/name: logging-fluentd
+    app.kubernetes.io/component: fluentd
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: manually
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  # This is redundant with non-root + disallow privilege escalation,
+  # but we can provide it for defense in depth.
+  requiredDropCapabilities:
+    - ALL
+  # Allow core volume types.
+  volumes:
+    - 'configMap'
+    - 'secret'
+    - 'hostPath'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    # Permits the container to run with root privileges as well.
+    rule: 'RunAsAny'
+  seLinux:
+    # This policy assumes the nodes are using AppArmor rather than SELinux.
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      # Allow adding the root group.
+      - min: 0
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      # Allow adding the root group.
+      - min: 0
+        max: 65535
+  readOnlyRootFilesystem: false

@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: events-reader
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: events-reader
+    app.kubernetes.io/name: events-reader
+    app.kubernetes.io/component: events-reader
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+spec:
+  selector:
+    matchLabels:
+      name: events-reader
+  strategy:
+    rollingUpdate:
+      maxSurge: 25
+      maxUnavailable: 25
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: events-reader
+        app.kubernetes.io/name: events-reader
+        app.kubernetes.io/component: events-reader
+        app.kubernetes.io/part-of: logging
+        app.kubernetes.io/managed-by: logging-operator
+    spec:
+      serviceAccountName: events-reader
+{{ if and .Values.CloudEventsReader.NodeSelectorKey .Values.CloudEventsReader.NodeSelectorValue }}
+      nodeSelector:
+{{ .Values.CloudEventsReader.NodeSelectorKey | indent 8 }}: {{ .Values.CloudEventsReader.NodeSelectorValue }}
+{{ end }}
+      containers:
+        - name: events-reader
+          image: {{ .Values.CloudEventsReader.DockerImage }}
+          command: [ "/events-reader/eventsreader" ]
+          {{- if .Values.CloudEventsReader.Args }}
+          args:
+            {{- range .Values.CloudEventsReader.Args }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- else }}
+          args: []
+          {{- end }}
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            failureThreshold: 1
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 2
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          readinessProbe:
+            failureThreshold: 1
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 2
+{{- if .Values.CloudEventsReader.Resources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.CloudEventsReader.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.CloudEventsReader.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.CloudEventsReader.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.CloudEventsReader.Resources.Requests "memory" }}
+{{- end }}
+          env:
+            - name: OPENSHIFT_URL
+              value: {{ .Values.CloudURL }}
+{{ if not .Values.OpenshiftDeploy }}
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+{{ end }}

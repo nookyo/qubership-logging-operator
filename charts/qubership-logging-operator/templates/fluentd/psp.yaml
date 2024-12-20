@@ -1,0 +1,58 @@
+{{- if .Capabilities.APIVersions.Has "policy/v1beta1" }}
+{{- if .Values.createClusterAdminEntities }}
+{{- if .Values.fluentd.install }}
+{{- if .Values.fluentd.securityResources.install }}
+apiVersion: policy/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ .Values.fluentd.securityResources.name }}
+  annotations:
+    kubernetes.io/description: {{ .Values.fluentd.securityResources.name }} psp is used for the fluentd daemonset
+  {{- if .Values.fluentd.annotations }}
+    {{- toYaml .Values.fluentd.annotations | nindent 4 }}
+  {{- end }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.fluentd.securityResources.name }}
+    app.kubernetes.io/component: fluentd
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentd.labels }}
+    {{- toYaml .Values.fluentd.labels | nindent 4 }}
+  {{- end }}
+spec:
+  privileged: false
+  allowPrivilegeEscalation: false
+  allowedHostPaths:
+  - pathPrefix: /var/log
+  - pathPrefix: /var/lib/docker/containers
+    readOnly: true
+  # Allow core volume types.
+  volumes:
+    - 'configMap'
+    - 'secret'
+    - 'hostPath'
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  runAsUser:
+    # Permits the container to run with root privileges as well.
+    rule: 'RunAsAny'
+  seLinux:
+    # This policy assumes the nodes are using AppArmor rather than SELinux.
+    rule: 'RunAsAny'
+  supplementalGroups:
+    rule: 'MustRunAs'
+    ranges:
+      # Allow adding the root group.
+      - min: 0
+        max: 65535
+  fsGroup:
+    rule: 'MustRunAs'
+    ranges:
+      # Allow adding the root group.
+      - min: 0
+        max: 65535
+  readOnlyRootFilesystem: false
+{{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

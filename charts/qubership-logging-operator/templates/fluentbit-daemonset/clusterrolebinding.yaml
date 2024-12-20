@@ -1,0 +1,28 @@
+{{- if .Values.createClusterAdminEntities }}
+{{- if .Values.fluentbit.install }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: fluentbit-cluster-reader
+  labels:
+    name: fluentbit-cluster-reader
+    app.kubernetes.io/name: fluentbit-cluster-reader
+    app.kubernetes.io/component: fluentbit
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentbit.labels }}
+    {{- toYaml .Values.fluentbit.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.fluentbit.annotations }}
+  annotations:
+    {{- toYaml .Values.fluentbit.annotations | nindent 4 }}
+  {{- end }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: logging-fluentbit-cluster-role
+subjects:
+  - kind: ServiceAccount
+    name: logging-fluentbit
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,18 @@
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1 
+metadata:
+  name: fluentd-cluster-reader
+  labels:
+    name: fluentd-cluster-reader
+    app.kubernetes.io/name: fluentd-cluster-reader
+    app.kubernetes.io/component: fluentd
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: manually
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: view
+subjects:
+  - kind: ServiceAccount
+    name: logging-fluentd
+    namespace: logging-service

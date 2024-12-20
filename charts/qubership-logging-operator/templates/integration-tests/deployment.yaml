@@ -1,0 +1,119 @@
+{{- if .Values.integrationTests.install }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.integrationTests.service.name }}
+  labels:
+    name: {{ .Values.integrationTests.service.name }}
+    app.kubernetes.io/name: {{ .Values.integrationTests.service.name }}
+    app.kubernetes.io/instance: {{ cat .Values.integrationTests.service.name "-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: integration-tests
+    app.kubernetes.io/part-of: logging
+    {{- $image := include "logging-integration-tests.image" . }}
+    app.kubernetes.io/version: {{ splitList ":" $image | last }}
+  {{- if .Values.integrationTests.labels }}
+    {{- toYaml .Values.integrationTests.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.integrationTests.annotations }}
+  annotations:
+    {{- toYaml .Values.integrationTests.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  selector:
+    matchLabels:
+      name: {{ .Values.integrationTests.service.name }}
+  strategy:
+    type: Recreate
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        name: {{ .Values.integrationTests.service.name }}
+        app.kubernetes.io/name: {{ .Values.integrationTests.service.name }}
+        app.kubernetes.io/instance: {{ cat .Values.integrationTests.service.name "-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+        app.kubernetes.io/component: integration-tests
+        app.kubernetes.io/part-of: logging
+        app.kubernetes.io/managed-by: Helm
+        {{- $image := include "logging-integration-tests.image" . }}
+        app.kubernetes.io/version: {{ splitList ":" $image | last }}
+      {{- if .Values.integrationTests.labels }}
+        {{- toYaml .Values.integrationTests.labels | nindent 8 }}
+      {{- end }}
+      {{- if .Values.integrationTests.annotations }}
+      annotations:
+        {{- toYaml .Values.integrationTests.annotations | nindent 8 }}
+      {{- end }}
+    spec:
+      serviceAccountName: {{ .Values.integrationTests.service.name }}
+      {{- if .Values.integrationTests.affinity }}
+      affinity:
+        {{ .Values.integrationTests.affinity | toJson }}
+      {{- end }}
+      {{- if .Values.integrationTests.priorityClassName }}
+      priorityClassName: {{ .Values.integrationTests.priorityClassName }}
+      {{- end }}
+      containers:
+        - name: {{ .Values.integrationTests.service.name }}
+          image: {{ template "logging-integration-tests.image" . }}
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          env:
+            - name: TAGS
+              value: {{ .Values.integrationTests.tags }}
+            - name: TIMEOUT_BEFORE_START
+              value: {{ .Values.integrationTests.timeoutBeforeStart | quote }}
+            - name: EXTERNAL_GRAYLOG_SERVER
+              value: {{ .Values.integrationTests.externalGraylogServer | quote  }}
+            - name: GRAYLOG_PROTOCOL
+              value: {{ .Values.integrationTests.graylogProtocol }}
+            - name: GRAYLOG_HOST
+              value: {{ .Values.integrationTests.graylogHost }}
+            - name: GRAYLOG_PORT
+              value: {{ .Values.integrationTests.graylogPort | quote }}
+            - name: LOGGING_PROJECT
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: GRAYLOG_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.integrationTests.service.name }}-secret
+                  key: graylog-user
+            - name: GRAYLOG_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.integrationTests.service.name }}-secret
+                  key: graylog-password
+            - name: VM_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.integrationTests.service.name }}-secret
+                  key: vm-user
+            - name: SSH_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.integrationTests.service.name }}-secret
+                  key: ssh-key
+            - name: OPENSHIFT_DEPLOY
+              value: {{ (.Capabilities.APIVersions.Has "security.openshift.io/v1") | default "false" | quote }}
+            - name: STATUS_WRITING_ENABLED
+              value: {{ .Values.integrationTests.statusWriting.enabled | quote }}
+            - name: ONLY_INTEGRATION_TESTS
+              value: {{ .Values.integrationTests.statusWriting.onlyIntegrationTests | quote }}
+            - name: IS_SHORT_STATUS_MESSAGE
+              value: {{ .Values.integrationTests.statusWriting.isShortStatusMessage | quote }}
+            - name: STATUS_CUSTOM_RESOURCE_PATH
+              value: {{ toYaml .Values.integrationTests.statusWriting.customResourcePath }}
+            - name: IS_STATUS_BOOLEAN
+              value: "true"
+          resources:
+            requests:
+              memory: {{ default "128Mi" .Values.integrationTests.resources.requests.memory }}
+              cpu: {{ default "100m" .Values.integrationTests.resources.requests.cpu }}
+            limits:
+              memory: {{ default "256Mi" .Values.integrationTests.resources.limits.memory }}
+              cpu: {{ default "200m" .Values.integrationTests.resources.limits.cpu }}
+          terminationMessagePath: /dev/termination-log
+          imagePullPolicy: Always
+{{- end }}

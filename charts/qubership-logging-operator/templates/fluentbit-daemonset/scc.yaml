@@ -1,0 +1,54 @@
+{{/* Can be used only for deployment in OpenShift 3.11, 4.x */}}
+{{- if .Capabilities.APIVersions.Has "security.openshift.io/v1" }}
+  {{- if .Values.createClusterAdminEntities }}
+    {{- if .Values.fluentbit.install }}
+      {{- if .Values.fluentbit.securityResources.install }}
+apiVersion: security.openshift.io/v1
+kind: SecurityContextConstraints
+priority: 3
+metadata:
+  name: {{ .Values.fluentbit.securityResources.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.fluentbit.securityResources.name }}
+    app.kubernetes.io/component: fluentbit
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentbit.labels }}
+    {{- toYaml .Values.fluentbit.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.fluentbit.annotations }}
+  annotations:
+    {{- toYaml .Values.fluentbit.annotations | nindent 4 }}
+  {{- end }}
+allowPrivilegedContainer: {{ .Values.fluentbit.securityContextPrivileged }}
+allowHostDirVolumePlugin: true
+runAsUser:
+  type: RunAsAny
+seLinuxContext:
+  type: RunAsAny
+fsGroup:
+  type: RunAsAny
+supplementalGroups:
+  type: RunAsAny
+users:
+  - system:serviceaccount:{{ .Release.Namespace }}:logging-fluentbit
+  - system:serviceaccount:{{ .Release.Namespace }}:logging-fluentbit-aggregator
+defaultAddCapabilities: []
+requiredDropCapabilities: []
+allowedCapabilities: []
+volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - hostPath
+  - persistentVolumeClaim
+  - projected
+  - secret
+allowHostNetwork: false
+allowHostPorts: false
+allowHostPID: false
+allowHostIPC: false
+readOnlyRootFilesystem: false
+      {{- end }}
+    {{- end }}
+  {{- end }}
+{{- end }}

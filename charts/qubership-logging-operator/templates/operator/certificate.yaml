@@ -1,0 +1,51 @@
+{{- if or (include "graylog.http.generateCerts.enabled" . ) (include "graylog.input.generateCerts.enabled" . ) (include "fluentd.generateCerts.enabled" . ) (include "fluentbit.generateCerts.enabled" . ) (include "fluentbit.aggregator.generateCerts.enabled" . ) }}
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: logging-self-signed-ca-certificate
+  labels:
+    name: logging-self-signed-ca-certificate
+    app.kubernetes.io/name: logging-self-signed-ca-certificate
+    app.kubernetes.io/instance: {{ cat "logging-self-signed-ca-certificate-" .Release.Namespace | nospace | trunc 63 | trimSuffix "-" }}
+    app.kubernetes.io/component: logging-operator
+    app.kubernetes.io/part-of: logging
+    {{- $image := include "logging-operator.image" . }}
+    app.kubernetes.io/version: {{ splitList ":" $image | last }}
+  {{- if .Values.labels }}
+    {{- toYaml .Values.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.annotations }}
+  annotations:
+    {{- toYaml .Values.annotations | nindent 4 }}
+  {{- end }}
+spec:
+  secretName: logging-self-signed-ca-certificate
+  duration: 8760h
+  renewBefore: 360h
+  commonName: logging-self-signed-ca-certificate
+  isCA: true
+  privateKey:
+    rotationPolicy: Always
+    algorithm: RSA
+    encoding: PKCS1
+    size: 2048
+  dnsNames:
+    - localhost
+    - graylog-service.{{ .Release.Namespace }}.svc
+    - logging-fluentd.{{ .Release.Namespace }}.svc
+    - logging-fluentbit.{{ .Release.Namespace }}.svc
+    {{- if .Values.graylog.install }}
+    - {{ regexFind "([-a-zA-Z\\d]+\\.)+([-a-zA-Z\\d])+" (include "graylog.host" .) }}
+    {{- end }}
+    {{- if .Values.fluentbit.aggregator }}
+    {{- if .Values.fluentbit.aggregator.install }}
+    - logging-fluentbit-forwarder.{{ .Release.Namespace }}.svc
+    - logging-fluentbit-aggregator.{{ .Release.Namespace }}.svc
+    {{- end }}
+    {{- end }}
+  ipAddresses:
+    - 127.0.0.1
+  issuerRef:
+    name: logging-self-signed-issuer
+    group: cert-manager.io
+{{- end }}

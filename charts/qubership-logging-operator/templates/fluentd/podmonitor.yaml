@@ -1,0 +1,32 @@
+{{- if .Values.fluentd.install }}
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  labels:
+    app.kubernetes.io/name: fluentd-pod-monitor
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.fluentd.labels }}
+    {{- toYaml .Values.fluentd.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.fluentd.annotations }}
+  annotations:
+    {{- toYaml .Values.fluentd.annotations | nindent 4 }}
+  {{- end }}
+  name: fluentd-pod-monitor
+spec:
+  jobLabel: k8s-app
+  podMetricsEndpoints:
+    - interval: {{ .Values.fluentd.podMonitor.scrapeInterval }}
+      scrapeTimeout: {{ .Values.fluentd.podMonitor.scrapeTimeout }}
+      path: /metrics
+      # As fluentd worker increment port for sources with increments worker index
+      # (port 24231 -> worker 1 -> port 24232)
+      port: metrics
+    - interval: 30s
+      path: /metrics
+      port: reload-metrics
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: fluentd
+{{- end }}

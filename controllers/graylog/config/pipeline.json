@@ -1,0 +1,35 @@
+{
+   "title": "Logs routing",
+   "description": "Routing log messages from 'Default Stream' to the appropriate streams",
+   "source": "pipeline \"Logs routing\"\nstage 0 match either\nrule \"Remove kubernetes field\"\nrule \"Remove kubernetes_labels field\"\nrule \"Route Audit logs\"\nrule \"Route System logs\"\nrule \"Processing unsupported symbols\"\n{{- range $s := .Values.Graylog.Streams }}{{- if and (eq $s.Name "Kubernetes events")}}rule \"Route Kubernetes events\"\n{{- end }}{{- if and (eq $s.Name "Integration logs")}}rule \"Route Integration logs\"\n{{- end }}{{- if and (eq $s.Name "Access logs")}}rule \"Route Access logs\"\n{{- end }}{{- if and (eq $s.Name "Bill Cycle logs")}}rule \"Route Bill Cycle logs\"\n{{- end }}{{- if and (eq $s.Name "Nginx logs")}}rule \"Route Nginx logs\"\n{{- end }}{{- end }}end",
+   "stages": [
+      {
+         "stage": 0,
+         "match": "EITHER",
+         "rules": [
+            "Remove kubernetes filed",
+            "Remove kubernetes_labels filed",
+            "Route Audit logs",
+            "Route System logs",
+            "Processing unsupported symbols"
+{{- range $s := .Values.Graylog.Streams }}
+{{- if eq $s.Name "Kubernetes events" }}
+            ,"Kubernetes events logs"
+{{- end }}
+{{- if eq $s.Name "Integration logs" }}
+            ,"Route Integration logs"
+{{- end }}
+{{- if eq $s.Name "Access logs" }}
+            ,"Route Access logs"
+{{- end }}
+{{- if eq $s.Name "Bill Cycle logs" }}
+            ,"Route Bill Cycle logs"
+{{- end }}
+{{- if eq $s.Name "Nginx logs" }}
+            ,"Route Nginx logs"
+{{- end }}
+{{- end }}
+         ]
+      }
+   ]
+}

@@ -1,0 +1,37 @@
+{
+  "title": "Kubernetes events index set",
+  "description": "The Graylog Kubernetes events index set",
+  "index_prefix": "gray_k8s_event",
+  "shards": {{ if .Values.Graylog.IndexShards -}}{{ .Values.Graylog.IndexShards }}{{ else }}4{{ end }},
+  "replicas": {{ if .Values.Graylog.IndexReplicas -}}{{ .Values.Graylog.IndexReplicas }}{{ else }}1{{ end }},
+{{- range $s := .Values.Graylog.Streams }}
+{{- if (eq $s.Name "Kubernetes events")}}
+{{- if (eq $s.RotationStrategy "timeBased")}}
+  "rotation_strategy_class": "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategy",
+  "rotation_strategy": {
+    "type": "org.graylog2.indexer.rotation.strategies.TimeBasedRotationStrategyConfig",
+    "rotation_period": {{ if $s.RotationPeriod -}}"{{ $s.RotationPeriod }}"{{ else }}"P1M"{{ end }},
+    "max_rotation_period": null
+  },
+{{- else }}
+  "rotation_strategy_class": "org.graylog2.indexer.rotation.strategies.SizeBasedRotationStrategy",
+  "rotation_strategy": {
+    "type": "org.graylog2.indexer.rotation.strategies.SizeBasedRotationStrategyConfig",
+    "max_size": {{ if $s.MaxSize -}}{{ $s.MaxSize }}{{ else }}1073741824{{ end }}
+  },
+{{- end }}
+  "retention_strategy_class": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategy",
+  "retention_strategy": {
+    "type": "org.graylog2.indexer.retention.strategies.DeletionRetentionStrategyConfig",
+    "max_number_of_indices": {{ if $s.MaxNumberOfIndices -}}{{ $s.MaxNumberOfIndices }}{{ else }}5{{ end }}
+{{- end }}
+{{- end }}
+  },
+  "creation_date": "{{ timeNow }}",
+  "index_analyzer": "standard",
+  "index_optimization_max_num_segments": 1,
+  "index_optimization_disabled": false,
+  "writable": true,
+  "default": false,
+  "field_type_refresh_interval": 5000
+}

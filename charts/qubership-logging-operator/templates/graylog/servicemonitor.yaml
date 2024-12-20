@@ -1,0 +1,56 @@
+{{- if .Values.graylog.install }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/name: graylog-service-monitor
+    app.kubernetes.io/component: monitoring
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.graylog.annotations }}
+  annotations:
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+  name: graylog-service-monitor
+spec:
+  endpoints:
+    - basicAuth:
+        password:
+          key: password
+          name: graylog-secret
+        username:
+          key: user
+          name: graylog-secret
+      interval: {{ .Values.graylog.serviceMonitor.scrapeInterval }}
+      scrapeTimeout: {{.Values.graylog.serviceMonitor.scrapeTimeout }}
+      metricRelabelings:
+        # We doesn't use metrics about usage Graylog's REST, so drop them
+        - action: drop
+          regex: org_graylog2_rest_.*
+          sourceLabels:
+            - __name__
+      path: /api/plugins/org.graylog.plugins.metrics.prometheus/metrics
+      port: graylog
+      {{- if .Values.graylog.tls }}
+      {{- if .Values.graylog.tls.http }}
+      {{- if .Values.graylog.tls.http.enabled }}
+      scheme: https
+      tlsConfig:
+        insecureSkipVerify: true
+      {{- end }}
+      {{- end }}
+      {{- end }}
+    {{- if .Values.graylog.authProxy.install }}
+    - interval: {{ .Values.graylog.serviceMonitor.scrapeInterval }}
+      scrapeTimeout: {{.Values.graylog.serviceMonitor.scrapeTimeout }}
+      path: /metrics
+      port: metrics
+      scheme: http
+    {{- end }}
+  jobLabel: k8s-app
+  selector:
+    matchLabels:
+      name: graylog
+{{- end }}

@@ -1,0 +1,303 @@
+kind: StatefulSet
+apiVersion: apps/v1
+metadata:
+  name: logging-fluentbit-aggregator
+  namespace: {{ .Release.Namespace }}
+  labels:
+    name: logging-fluentbit-aggregator
+    app.kubernetes.io/name: logging-fluentbit-aggregator
+    app.kubernetes.io/component: fluentbit
+    app.kubernetes.io/part-of: logging
+    app.kubernetes.io/managed-by: logging-operator
+    component: logging-fluentbit-aggregator
+{{- if .Values.OpenshiftDeploy }}
+    provider: openshift
+{{- else }}
+    provider: kubernetes
+{{- end }}
+    kubernetes.io/cluster-service: "true"
+spec:
+  replicas: {{ default "2" .Values.Fluentbit.Aggregator.Replicas }}
+  serviceName: "logging-fluentbit-aggregator"
+  selector:
+    matchLabels:
+      name: logging-fluentbit-aggregator
+      component: logging-fluentbit-aggregator
+{{- if .Values.OpenshiftDeploy }}
+      provider: openshift
+{{- else }}
+      provider: kubernetes
+{{- end }}
+  template:
+    metadata:
+      name: logging-fluentbit-aggregator
+      labels:
+        name: logging-fluentbit-aggregator
+        app.kubernetes.io/name: logging-fluentbit-aggregator
+        app.kubernetes.io/component: fluentbit
+        app.kubernetes.io/part-of: logging
+        app.kubernetes.io/managed-by: logging-operator
+        component: logging-fluentbit-aggregator
+{{- if .Values.OpenshiftDeploy }}
+        provider: openshift
+{{- else }}
+        provider: kubernetes
+{{- end }}
+        kubernetes.io/cluster-service: "true"
+    spec:
+      volumes:
+{{- if and .Values.Fluentbit.Aggregator.Volume .Values.Fluentbit.Aggregator.Volume.Bind }}{{- else }}
+        - name: storage
+          emptyDir: {}
+{{- end }}
+        - name: config
+          configMap:
+            name: logging-fluentbit-aggregator
+            defaultMode: 420
+{{- if .Values.Fluentbit.Aggregator.TLS }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.GenerateCerts .Values.Fluentbit.Aggregator.TLS.GenerateCerts.Enabled }}
+        - name: tls-ca
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+        - name: tls-cert
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+        - name: tls-key
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.TLS.GenerateCerts.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- else }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.CA .Values.Fluentbit.Aggregator.TLS.CA.SecretName .Values.Fluentbit.Aggregator.TLS.CA.SecretKey }}
+        - name: tls-ca
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.TLS.CA.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.Cert .Values.Fluentbit.Aggregator.TLS.Cert.SecretName .Values.Fluentbit.Aggregator.TLS.Cert.SecretKey }}
+        - name: tls-cert
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.TLS.Cert.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.Key .Values.Fluentbit.Aggregator.TLS.Key.SecretName .Values.Fluentbit.Aggregator.TLS.Key.SecretKey }}
+        - name: tls-key
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.TLS.Key.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.Output .Values.Fluentbit.Aggregator.Output.Loki .Values.Fluentbit.Aggregator.Output.Loki.Enabled }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.Auth .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token.Name .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token.Key }}
+        - name: loki-auth-token
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token.Name }}
+            defaultMode: 220
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS .Values.Fluentbit.Aggregator.Output.Loki.TLS.Enabled }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA.SecretName .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA.SecretKey }}
+        - name: loki-tls-ca
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert.SecretName .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert.SecretKey }}
+        - name: loki-tls-cert
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key.SecretName .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key.SecretKey }}
+        - name: loki-tls-key
+          secret:
+            secretName: {{ .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key.SecretName }}
+            defaultMode: 420 # RW grants for config map files
+{{- end }}
+{{- end }}
+{{- end }}
+      containers:
+        - name: configmap-reload
+          image: {{ .Values.Fluentbit.Aggregator.ConfigmapReload.DockerImage }}
+          args:
+            - --volume-dir=/fluent-bit/etc
+            - --webhook-url=http://localhost:2020/api/v2/reload
+            - --webhook-retries=5
+          volumeMounts:
+            - mountPath: /fluent-bit/etc
+              name: config
+              readOnly: true
+          {{- if .Values.Fluentbit.Aggregator.ConfigmapReload.Resources }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Fluentbit.Aggregator.ConfigmapReload.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.Aggregator.ConfigmapReload.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Fluentbit.Aggregator.ConfigmapReload.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.Aggregator.ConfigmapReload.Resources.Requests "memory" }}
+          {{- end }}
+          ports:
+            - containerPort: 9533
+              name: reload-metrics
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+        - name: logging-fluentbit-aggregator
+          image: {{ .Values.Fluentbit.Aggregator.DockerImage }}
+          ports:
+            - containerPort: 2020
+              protocol: TCP
+              name: "http"
+            - containerPort: 24224
+              protocol: TCP
+              name: "forward"
+          env:
+{{- if and .Values.Fluentbit.Aggregator.Output .Values.Fluentbit.Aggregator.Output.Loki .Values.Fluentbit.Aggregator.Output.Loki.Enabled }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.Auth .Values.Fluentbit.Aggregator.Output.Loki.Auth.User .Values.Fluentbit.Aggregator.Output.Loki.Auth.User.Name .Values.Fluentbit.Aggregator.Output.Loki.Auth.User.Key .Values.Fluentbit.Aggregator.Output.Loki.Auth.Password .Values.Fluentbit.Aggregator.Output.Loki.Auth.Password.Name .Values.Fluentbit.Aggregator.Output.Loki.Auth.Password.Key }}
+            - name: LOKI_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentbit.Aggregator.Output.Loki.Auth.User.Name }}
+                  key: {{ .Values.Fluentbit.Aggregator.Output.Loki.Auth.User.Key }}
+            - name: LOKI_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentbit.Aggregator.Output.Loki.Auth.Password.Name }}
+                  key: {{ .Values.Fluentbit.Aggregator.Output.Loki.Auth.Password.Key }}
+{{- else if and .Values.Fluentbit.Aggregator.Output.Loki.Auth .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token.Name .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token.Key }}
+            - name: LOKI_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token.Name }}
+                  key: {{ .Values.Fluentbit.Aggregator.Output.Loki.Auth.Token.Key }}
+{{- end }}
+{{- end }}
+          resources:
+            limits:
+              cpu: {{ resIndex .Values.Fluentbit.Aggregator.Resources.Limits "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.Aggregator.Resources.Limits "memory" }}
+            requests:
+              cpu: {{ resIndex .Values.Fluentbit.Aggregator.Resources.Requests "cpu" }}
+              memory: {{ resIndex .Values.Fluentbit.Aggregator.Resources.Requests "memory" }}
+          volumeMounts:
+            - name: storage
+              mountPath: /fluent-bit/storage
+{{- if and .Values.Fluentbit.Aggregator.Volume .Values.Fluentbit.Aggregator.Volume.Bind }}
+              readOnly: false
+{{- end }}
+            - name: config
+              readOnly: true
+              mountPath: /fluent-bit/etc
+{{- if .Values.Fluentbit.Aggregator.TLS }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.GenerateCerts .Values.Fluentbit.Aggregator.TLS.GenerateCerts.Enabled }}
+            - mountPath: /fluent-bit/tls/ca.crt
+              name: tls-ca
+              readOnly: true
+              subPath: "ca.crt"
+            - mountPath: /fluent-bit/tls/tls.crt
+              name: tls-cert
+              readOnly: true
+              subPath: "tls.crt"
+            - mountPath: /fluent-bit/tls/tls.key
+              name: tls-key
+              readOnly: true
+              subPath: "tls.key"
+{{- else }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.CA .Values.Fluentbit.Aggregator.TLS.CA.SecretName .Values.Fluentbit.Aggregator.TLS.CA.SecretKey }}
+            - mountPath: /fluent-bit/tls/ca.crt
+              name: tls-ca
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Aggregator.TLS.CA.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.Cert .Values.Fluentbit.Aggregator.TLS.Cert.SecretName .Values.Fluentbit.Aggregator.TLS.Cert.SecretKey }}
+            - mountPath: /fluent-bit/tls/tls.crt
+              name: tls-cert
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Aggregator.TLS.Cert.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.TLS.Key .Values.Fluentbit.Aggregator.TLS.Key.SecretName .Values.Fluentbit.Aggregator.TLS.Key.SecretKey }}
+            - mountPath: /fluent-bit/tls/tls.key
+              name: tls-key
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Aggregator.TLS.Key.SecretKey }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.Output .Values.Fluentbit.Aggregator.Output.Loki .Values.Fluentbit.Aggregator.Output.Loki.Enabled }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS .Values.Fluentbit.Aggregator.Output.Loki.TLS.Enabled }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA.SecretName .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA.SecretKey }}
+            - mountPath: /fluent-bit/output/loki/tls/ca.crt
+              name: loki-tls-ca
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Aggregator.Output.Loki.TLS.CA.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert.SecretName .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert.SecretKey }}
+            - mountPath: /fluent-bit/output/loki/tls/tls.crt
+              name: loki-tls-cert
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Aggregator.Output.Loki.TLS.Cert.SecretKey }}
+{{- end }}
+{{- if and .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key.SecretName .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key.SecretKey }}
+            - mountPath: /fluent-bit/output/loki/tls/tls.key
+              name: loki-tls-key
+              readOnly: true
+              subPath: {{ .Values.Fluentbit.Aggregator.Output.Loki.TLS.Key.SecretKey }}
+{{- end }}
+{{- end }}
+{{- end }}
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 2020
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /api/v1/health
+              port: 2020
+              scheme: HTTP
+            initialDelaySeconds: 5
+            timeoutSeconds: 10
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          securityContext:
+            runAsUser: 0
+            runAsNonRoot: false
+      terminationGracePeriodSeconds: 30
+      serviceAccountName: logging-fluentbit-aggregator
+      serviceAccount: logging-fluentbit-aggregator
+      securityContext:
+        runAsUser: 0
+        runAsNonRoot: false
+        fsGroup: 1001
+        fsGroupChangePolicy: OnRootMismatch
+      schedulerName: default-scheduler
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25
+      maxSurge: 25
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+{{- if and .Values.Fluentbit.Aggregator.Volume .Values.Fluentbit.Aggregator.Volume.Bind }}
+  volumeClaimTemplates:
+    - metadata:
+        name: storage
+      spec:
+        accessModes: [ "ReadWriteOnce" ]
+        storageClassName: {{ .Values.Fluentbit.Aggregator.Volume.StorageClassName }}
+        resources:
+          requests:
+            storage: {{ .Values.Fluentbit.Aggregator.Volume.StorageSize }}
+{{- end }}

@@ -1,0 +1,57 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Specifies whether a cluster-admin entities should be create
+createClusterAdminEntities: true
+
+# Operating system kind on cloud nodes: centos/rhel/oracle/ubuntu
+osKind: centos
+
+# Set to 'true' to deploy to IPv6 environment
+ipv6: false
+
+# Cloud containers runtime software. Possible values: docker/cri-o/containerd. In fact so far he differ docker and non-docker environments
+containerRuntimeType: docker
+
+##  Mandatory values for Graylog
+graylog:
+  install: true
+  host: graylog.kubernetes.test.org
+  elasticsearchHost: http://<username>:<password>@elasticsearch.elasticsearch-cluster:9200
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1500Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi
+  nodeSelectorKey: kubernetes.io/os
+  nodeSelectorValue: linux
+
+##  Mandatory values for Fluentd
+fluentd:
+  install: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+  nodeSelectorKey: kubernetes.io/os
+  nodeSelectorValue: linux
+  graylogHost: <graylog_dns_or_ip>
+  graylogPort: 12201
+
+##  Mandatory values for Cloud Events Reader
+cloudEventsReader:
+  install: true
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+  nodeSelectorKey: kubernetes.io/os
+  nodeSelectorValue: linux

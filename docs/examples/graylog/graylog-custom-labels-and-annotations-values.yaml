@@ -1,0 +1,21 @@
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+graylog:
+  install: true
+
+  annotations:
+    custom/key1: value1
+    custom/key2: value2
+  labels:
+    app.kubernetes.io/custom1: custom-value1
+    app.kubernetes.io/custom2: custom-value2
+
+  host: graylog.kubernetes.test.org
+  elasticsearchHost: http://<username>:<password>@opensearch.opensearch.svc:9200
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1500Mi
+    limits:
+      cpu: 500m
+      memory: 1500Mi

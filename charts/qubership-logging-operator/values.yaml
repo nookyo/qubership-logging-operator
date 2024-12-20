@@ -1,0 +1,2682 @@
+# Default values for Logging service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Provide a name of CR
+name: qubership-logging
+
+# Specifies whether a cluster-admin entities should be created.
+# Type: bool
+# Mandatory: no
+#
+createClusterAdminEntities: true
+
+# Cloud address. Openshift cloud may require to set the current host address.
+# Type: string
+# Example:
+cloudURL: "https://kubernetes.default.svc"
+
+# Operating system kind on cloud nodes: centos/rhel/oracle/ubuntu
+# Type: string
+# Mandatory: no
+#
+osKind: centos
+
+# Set to 'true' to deploy to IPv6 environment.
+# Type: bool
+# Mandatory: no
+#
+ipv6: false
+
+# Cloud containers runtime type: docker/cri-o/containerd/etc
+# Type: string
+# Mandatory: no
+#
+# containerRuntimeType: containerd
+
+# The log level of operator logs.
+# Type: string
+# Mandatory: no
+#
+logLevel: info
+
+# Map of string keys and values that can be used to organize and categorize (scope and select) objects.
+# May match selectors of replication controllers and services.
+# More info: https://kubernetes.io/docs/user-guide/labels
+# Example: labels: {"field":"value"}
+labels: {}
+
+# Annotations is an unstructured key value map stored
+# with a resource that may be set by external tools to store and retrieve arbitrary metadata.
+# They are not queryable and should be preserved when modifying objects.
+# More info: https://kubernetes.io/docs/user-guide/annotations
+# Example: labels: {"field":"value"}
+annotations: {}
+
+# qubership-logging-operator pprof
+# Type: object
+# Mandatory: no
+#
+pprof:
+
+  # Indicates if qubership-logging-operator has pprof enabled.
+  # Mandatory: no
+  # Default: true
+  #
+  install: true
+
+  # Type: integer
+  # Mandatory: no
+  # Default: 9180
+  #
+  containerPort: 9180
+
+  # Service configuration for pprof service
+  # Type: object
+  # Mandatory: no
+  #
+  service:
+    # Type of pprof service
+    # Type: string
+    # Mandatory: no
+    # Default: ClusterIP
+    #
+    type: ClusterIP
+
+    # Port of pprof which use in service
+    # Type: int
+    # Mandatory: no
+    # Default: 9100
+    #
+    port: 9180
+
+    # Port name of pprof which use in service
+    # Type: string
+    # Mandatory: no
+    # Default: http
+    #
+    portName: pprof
+
+    # Annotations set which will create in service
+    # Type: map[string]string
+    # Mandatory: no
+    # Default: {}
+    #
+    annotations: {}
+
+    # Labels set which will create in service
+    # Type: map[string]string
+    # Mandatory: no
+    # Default: {}
+    #
+    labels: {}
+
+# Image of qubership-logging-operator
+# operatorImage: qubership-logging-operator:main
+
+# skipMetricsService: false
+
+## Pod monitor for qubership-logging-operator
+## Type: object
+## Mandatory: no
+#
+podMonitor:
+  # Allow change metrics scrape timeout
+  # Type: string
+  # Mandatory: no
+  #
+  scrapeTimeout: 10s
+  # Allow change metrics scrape interval
+  # Type: string
+  # Mandatory: no
+  #
+  scrapeInterval: 30s
+
+# PriorityClassName assigned to the Pods to prevent them from evicting.
+# Type: string
+# priorityClassName: "priorityClassName"
+
+##  Mandatory values for Graylog.
+#
+graylog:
+  # Allow disabling create Graylog during deploy
+  # Type: boolean
+  # Mandatory: no
+  #
+  install: false
+
+  # A docker image to use for graylog deployment.
+  # Type: string
+  # Mandatory: yes
+  #
+  # dockerImage: graylog/graylog:5.2.7
+
+  # A docker image of MongoDB to use for graylog deployment.
+  # Type: string
+  # Mandatory: yes
+  #
+  # mongodbImage: mongo:5.0.19
+
+  # Activates automatic step-by-step upgrade of the MongoDB database.
+  # Can be used only for migration from Graylog 4 to 5.
+  # Type: boolean
+  # Mandatory: no
+  #
+  mongoUpgrade: false
+
+  # A docker image to initialize plugins for Graylog
+  # Type: string
+  # Mandatory: no
+  # Default: not set
+  #
+  # initContainerDockerImage: ghcr.io/netcracker/graylog-plugins-init-container:main
+
+  # A docker image for init container for Graylog
+  # Type: string
+  # Mandatory: no
+  # Default: not set
+  #
+  # initSetupImage: alpine:3.17.2
+
+  # A pathRepo for graylog-archiving-plugin
+  # Type: string
+  # Mandatory: no
+  # Default: "/usr/share/opensearch/snapshots/graylog/"
+  pathRepo: "/usr/share/opensearch/snapshots/graylog/"
+
+  # A flag for using S3-storage in the graylog-archiving-plugin
+  # Type: boolean
+  # Mandatory: no
+  # Default: false
+  s3Archive: false
+
+  # An accessKey for using S3-storage in the graylog-archiving-plugin
+  # Type: string
+  # Mandatory: no
+  # Default: not set
+  awsAccessKey: ""
+
+  # A secretKey for using S3-storage in the graylog-archiving-plugin
+  # Type: string
+  # Mandatory: no
+  # Default: not set
+  awsSecretKey: ""
+
+  # Graylog user.
+  # Type: string
+  #
+  user: admin
+
+  # Graylog password.
+  # Type: string
+  #
+  password: admin
+
+  # Indicates if Ingress need to be created.
+  # Default: true
+  #
+  createIngress: true
+
+  # The Graylog host for ingress. For example: https://graylog-service.kubernetes.cloud.org/
+  # Type: string
+  #
+  # host:
+
+  # The Graylog content deploy policy (streams, inputs, grok patterns, and so on). The possible values are:
+  # - only-create - Only the creation of missing content, without updating the existing content.
+  # - force-update - Forcibly updating out-of-the-box content. If the content does not exist, it is created.
+  # - skip - Skip all the content create/update tasks.
+  # Type: string
+  # Mandatory: no
+  # Default: "only-create".
+  # contentDeployPolicy: only-create
+
+  # The name of an IngressClass cluster resource.
+  # Type: string
+  #
+  # ingressClassName:
+
+  # Mongo PVC name.
+  # Type: string
+  # Default: ""
+  #
+  mongoPersistentVolume:
+
+  # Mongo PVC storage class name.
+  # Type: string
+  # Default: ""
+  #
+  mongoStorageClassName: ""
+
+  # Graylog PVC name.
+  # Type: string
+  # Default: ""
+  #
+  graylogPersistentVolume:
+
+  # Graylog PVC storage class name.
+  # Type: string
+  # Default: ""
+  #
+  graylogStorageClassName: ""
+
+  # Storage size, e.g. '2Gi'
+  # Default: 2Gi
+  #
+  storageSize: 2Gi
+
+  # Will be deprecated in the future releases. Use configuration for OpenSearch below-mentioned instead.
+  # ElasticSearch host.
+  # Type: string
+  # Example: http://user:password@elasticsearch.elasticsearch-cluster:9200
+  #
+  # elasticsearchHost:
+
+  # The number of Elasticsearch shards used per index.
+  # Default: 4
+  #
+  # indexShards: 4
+
+  # The number of Elasticsearch replicas used per index.
+  # Default: 1
+  #
+  # indexReplicas: 1
+
+  # Set max size for the default index in case
+  # Type: int
+  #
+  # maxSize: ""
+
+  # Set max number of indices in the default index-set
+  # Type: int
+  # maxNumberOfIndices
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  graylogResources:
+    requests:
+      cpu: 500m
+      memory: 1536Mi
+    limits:
+      cpu: 1000m
+      memory: 2048Mi
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  mongoResources:
+    requests:
+      cpu: 500m
+      memory: 256Mi
+    limits:
+      cpu: 500m
+      memory: 256Mi
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  initResources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 256Mi
+
+  # Allow defines which Nodes the Pods are scheduled on.
+  # nodeSelectorKey - key name.
+  # nodeSelectorValue - value.
+  # Default: not set
+  #
+  # Example:
+    # nodeSelectorKey: role
+    # nodeSelectorValue: compute
+
+  ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
+  #
+  securityResources:
+    name: logging-graylog
+    install: false
+
+  # Graylog server java opts.
+  # Type: string
+  #
+  # javaOpts: -Xms1024m -Xmx1024m
+
+  # Will be deprecated in the future releases
+  # Graylog content pack path.
+  # Type: string
+  # Default: ""
+  #
+  contentPackPaths:
+
+  # Graylog content packs.
+  # Type: object
+  # Default: ""
+  #
+  contentPack: []
+    # - http:
+      # credentials:
+      #   username:
+      #     key: user
+      #     name: secret-name
+      #   password:
+      #     key: password
+      #     name: secret-name
+      # tlsConfig:
+      #   insecureSkipVerify: false
+      #   ca:
+      #     key: cert-ca.pem
+      #     name: secret-certificate-authority
+      #   cert:
+      #     key: cert.crt
+      #     name: secret-certificate
+      #   pkey:
+      #     key: cert.key
+      #     name: secret-certificate
+      # url: graylog content pack path
+
+  # Graylog plugin path.
+  # Type: string
+  # Default: ""
+  #
+  # customPluginsPaths:
+
+  # The amount of time the operator waits for a Graylog pod to start, in minutes
+  # Type: int
+  # Default: 10
+  #
+  # startupTimeout: 10
+
+  # Optional. Size of internal ring buffers. Raise this if raising outputbuffer_processors does not help anymore.
+  # For optimum performance your LogMessage objects in the ring buffer should fit in your CPU L3 cache.
+  # Must be a power of 2. (512, 1024, 2048, ...)
+  # ringSize: 262144
+  # inputbufferRingSize: 131072
+
+  # Optional. The number of processors.
+  # inputbufferProcessors: 3
+  # processbufferProcessors: 6
+  # outputbufferProcessors: 6
+
+  # Optional. The maximum number of threads to allow in the pool
+  # outputbufferProcessorThreadsMaxPoolSize: 33
+
+  # Optional. Batch size for the Elasticsearch output. This is the maximum (!) number of messages the Elasticsearch output
+  # module will get at once and write to Elasticsearch in a batch call. If the configured batch size has not been
+  # reached within output_flush_interval seconds, everything that is available will be flushed at once. Remember
+  # that every outputbuffer processor manages its own batch and performs its own batch write calls.
+  # ("outputbuffer_processors" variable)
+  # outputBatchSize: 1000
+
+  # Optional. Maximum number of total connections to Elasticsearch.
+  # elasticsearchMaxTotalConnections: 100
+
+  # Maximum number of total connections per Elasticsearch route (normally this means per elasticsearch server).
+  # elasticsearchMaxTotalConnectionsPerRoute: 100
+
+  # Configuration for enable streams.
+  # System and audit logs will be created by default if the section is empty.
+  # Type: array
+  # Mandatory: no
+  #
+  streams:
+  # The title of a stream in Graylog.
+  # Available logs are "System logs", "Audit logs", "Kubernetes events", "Access logs", "Integration logs" and "Bill Cycle logs".
+  # Type: string
+  #
+  # - name: "System logs"
+
+  # Allows creating the stream
+  # Type: boolean
+  # Default: false
+  #
+  #   install: true
+
+  # Sets rotation strategy to index set of the stream.
+  # Available values: "sizeBased", "timeBased".
+  # Default: sizeBased
+  # Type: string
+  #
+  #   rotationStrategy: "sizeBased"
+
+  # Sets rotation period to index set of the stream if rotationStrategy is "sizeBased".
+  # The parameter must be set as ISO 8601 Duration.
+  # Type: string
+  #
+  #   rotationPeriod: ""
+
+  # Set max size for the index in case of "sizeBased" rotations strategy
+  # Type: int
+  #
+  #   maxSize: ""
+
+  # Set max number of indices in the index-set
+  # Type: int
+  #   maxNumberOfIndices
+
+  # - name: "Audit logs"
+  #   install: true
+  #   rotationStrategy: "timeBased"
+  #   rotationPeriod: "P1M"
+  #   maxSize: 1073741824
+  #   maxNumberOfIndices: 5
+
+  # - name: "Kubernetes events"
+  #   install: true
+  #   rotationStrategy: "timeBased"
+  #   rotationPeriod: "P1M"
+  #   maxNumberOfIndices: 5
+
+  # - name: "Integration logs"
+  #   install: false
+  #   rotationStrategy: "timeBased"
+  #   rotationPeriod: "P1M"
+  #   maxSize: 1073741824
+  #   maxNumberOfIndices: 5
+
+  # - name: "Access logs"
+  #   install: false
+  #   rotationStrategy: "timeBased"
+  #   rotationPeriod: "P1M"
+  #   maxSize: 1073741824
+  #   maxNumberOfIndices: 5
+
+  # - name: "Nginx logs"
+  #   install: false
+  #   rotationStrategy: "timeBased"
+  #   rotationPeriod: "P1M"
+  #   maxSize: 1073741824
+  #   maxNumberOfIndices: 5
+
+  # Logs contains special key-value markers: ["nrm.qubership.org/application=nrm"]
+  # OR ["app.kubernetes.io/part-of=nrm"] OR ["nrm.qubership.org/application=cm"] OR ["app.kubernetes.io/part-of=cm"]
+  # - name: "Bill Cycle logs"
+  #   install: false
+  #   rotationStrategy: "timeBased"
+  #   rotationPeriod: "P1M15D"
+  #   maxSize: 1073741824
+  #   maxNumberOfIndices: 10
+
+  # PriorityClassName assigned to the Pods to prevent them from evicting.
+  # Type: string
+  # priorityClassName: "priorityClassName"
+
+  # Configuration for TLS enabling for Graylog.
+  # Type: object
+  # Mandatory: no
+  #
+  tls:
+    # Configuration for TLS for HTTP interface.
+    # Certificate and private key for Graylog server and CA certificates in the Graylog keystore can be specified in
+    # this section.
+    # Type: object
+    # Mandatory: no
+    #
+    http:
+      # Allows enabling TLS for HTTP interface.
+      # If this parameter is true, each connection to and from the Graylog server except inputs will be secured by TLS,
+      # including API calls of the server to itself.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      enabled: false
+
+      # generateCerts:
+      #   enabled: false
+      #   secretName: graylog-http-cert-manager-tls
+      #   clusterIssuerName: ""
+      #   duration: 365
+      #   renewBefore: 15
+
+      # Contains a name of Secret with CA certificates for a custom CA store.
+      # If present, all certificates from the Secret will be added to the Java keystore.
+      # The keystore can be used for TLS in the custom inputs as well.
+      # Type: string
+      # Mandatory: no
+      #
+      # cacerts: secret-ca
+
+      # The X.509 certificate chain file in PEM format to use for securing the HTTP interface.
+      # If present, both secretKey and secretName fields are required.
+      # This certificate will be added to the Java keystore.
+      # Type: object
+      # Mandatory: no
+      #
+      # cert:
+        # Name of Secret with the certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-cert
+
+        # Key (filename) in the Secret with the certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: certificate.crt
+
+      # The PKCS#8 private key file in PEM format to use for securing the HTTP interface.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # key:
+        # Name of Secret with the private key for the certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-key
+
+        # Key (filename) in the Secret with the private key for the certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: privateKey.key
+
+      # The password to unlock the private key used for securing the HTTP interface.
+      # Type: string
+      # Mandatory: no
+      #
+      # keyFilePassword:
+
+    # Configuration for TLS for out-of-box GELF input.
+    # Type: object
+    # Mandatory: no
+    #
+    input:
+      # Allows enabling TLS for out-of-box GELF input managed by the operator.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      enabled: false
+
+      #  generateCerts:
+      #    enabled: false
+      #    secretName: graylog-input-cert-manager-tls
+      #    clusterIssuerName: ""
+      #    duration: 365
+      #    renewBefore: 15
+
+      # The X.509 certificate chain file in PEM format to use for securing Graylog input.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # cert:
+      # Name of Secret with the certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-cert
+
+      # Key (filename) in the Secret with the certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: certificate.crt
+
+      # The PKCS#8 private key file in PEM format to use for securing Graylog input.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # key:
+      # Name of Secret with the private key for the certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-key
+
+      # Key (filename) in the Secret with the private key for the certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: privateKey.key
+
+      # The password to unlock the private key used for securing Graylog input.
+      # Type: string
+      # Mandatory: no
+      #
+      # keyFilePassword:
+
+  # Configuration for TLS enabling for OpenSearch.
+  # Type: object
+  # Mandatory: no
+  #
+  # openSearch:
+  #  http:
+  #    credentials:
+  #      username:
+  #        key: user
+  #        name: secret-name
+  #      password:
+  #        key: password
+  #        name: secret-name
+  #  tlsConfig:
+  #    insecureSkipVerify: false
+  #    ca:
+  #      key: cert-ca.pem
+  #      name: secret-certificate-authority
+  #    cert:
+  #      key: cert.crt
+  #      name: secret-certificate
+  #    pkey:
+  #      key: cert.key
+  #      name: secret-certificate
+  #  url: OpenSearch url
+
+
+  ## Service monitor for graylog
+  ## Type: object
+  ## Mandatory: no
+  #
+  serviceMonitor:
+    # Allow change metrics scrape timeout
+    # Type: string
+    # Mandatory: no
+    #
+    scrapeTimeout: 10s
+    # Allow change metrics scrape interval
+    # Type: string
+    # Mandatory: no
+    #
+    scrapeInterval: 30s
+
+  ## Settings for graylog-auth-proxy
+  ## Type: object
+  ## Mandatory: no
+  #
+  authProxy:
+    # Allows enabling graylog-auth-proxy installation.
+    # Type: bool
+    # Mandatory: no
+    # Default: false
+    #
+    install: false
+
+    # Logging level.
+    # Allowed values: DEBUG, INFO, WARNING, ERROR, CRITICAL
+    # Type: string
+    # Mandatory: no
+    # Default: INFO
+    #
+    logLevel: INFO
+
+    # The resources describe to compute resource requests and limits for graylog-auth-proxy container.
+    # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    # Type: object
+    #
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 200m
+        memory: 512Mi
+
+    # A docker image for graylog-auth-proxy.
+    # Type: string
+    # Mandatory: yes
+    #
+    # image: ghcr.io/netcracker/graylog-auth-proxy:main
+
+    # A global timeout parameter affects requests to LDAP server, OAuth server and Graylog server.
+    # Type: float
+    # Mandatory: no
+    # Default: 30
+    #
+    requestsTimeout: 30
+
+    # Defines which type of authentication protocol will be chosen (LDAP or OAuth 2.0).
+    # Allowed values: ldap, oauth
+    # Type: string
+    # Mandatory: no
+    # Default: ldap
+    #
+    authType: "ldap"
+
+    # Configuration for LDAP or AD connection
+    # Type: object
+    #
+    ldap:
+      # LDAP host to query.
+      # Type: string
+      # Mandatory: yes
+      #
+      url: "ldap://localhost:389"
+
+      # Establish a STARTTLS protected session.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      startTls: false
+
+      # Establish an LDAP session over SSL.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      overSsl: false
+
+      # Allow skipping verification of the LDAP server's certificate.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      skipVerify: false
+
+      # Configuration for a Secret contains CA certificate for LDAP server.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # ca:
+        # Name of Secret with CA certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-ca
+
+        # Key (filename) in the Secret with CA certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: ca.crt
+
+      # Configuration for a client certificate.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # cert:
+        # Name of Secret with client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-cert
+
+        # Key (filename) in the Secret with client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: certificate.crt
+
+      # Configuration for a key for the certificate file.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # key:
+        # Name of Secret with key for the client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-key
+
+        # Key (filename) in the Secret with key for the client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: privateKey.key
+
+      # Sets ldap.OPT_REFERRALS to zero.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      disableReferrals: false
+
+      # LDAP base DN.
+      # Type: string
+      # Mandatory: yes
+      #
+      baseDN: ""
+
+      # LDAP bind DN.
+      # Type: string
+      # Mandatory: yes
+      #
+      bindDN: ""
+
+      # LDAP password for the bind DN.
+      # Will be stored in the secret with .ldap.bindPasswordSecret.name at key specified in the .ldap.bindPasswordSecret.key.
+      # Type: string
+      # Mandatory: yes
+      #
+      bindPassword: ""
+
+      # Allows to define a secret for bind password.
+      # Ref: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.24/#secretkeyselector-v1-core
+      # Type: object
+      # Mandatory: no
+      #
+      bindPasswordSecret:
+        name: graylog-auth-proxy-secret
+        key: bindPassword
+
+      # LDAP filter for binding users.
+      # Type: string
+      # Mandatory: no
+      # Default: (cn=%(username)s)
+      #
+      searchFilter: "(cn=%(username)s)"
+
+    # Configuration for OAuth 2.0 connection
+    # Type: object
+    #
+    oauth:
+
+      # OAuth2 authorization server host.
+      # Type: string
+      # Mandatory: yes
+      #
+      host: ""
+
+      # This path will be used to build URL for redirection to OAuth2 authorization server login page.
+      # Type: string
+      # Mandatory: yes
+      #
+      authorizationPath: ""
+
+      # This path will be used to build URL for getting access token from OAuth2 authorization server.
+      # Type: string
+      # Mandatory: yes
+      #
+      tokenPath: ""
+
+      # This path will be used to build URL for getting information about current user from OAuth2 authorization server
+      # to get username and entities (roles, groups, etc.) for Graylog roles and streams mapping.
+      # Type: string
+      # Mandatory: yes
+      #
+      userinfoPath: ""
+
+      # URI to redirect after successful logging in on the OAuth2 authorization server side.
+      # Uses "graylog.host" (the same host as in the Graylog Ingress) with /code path by default.
+      # Please make sure that your OAuth server allows using this URI as a redirection URI.
+      # Type: string
+      # Mandatory: no
+      #
+      # redirectUri:
+
+      # OAuth2 Client ID for the proxy.
+      # Type: string
+      # Mandatory: yes
+      #
+      clientID: ""
+
+      # OAuth2 Client Secret for the proxy.
+      # Will be stored in the secret with .oauth.clientCredentialsSecret.name at key specified in the .oauth.clientCredentialsSecret.key.
+      # Type: string
+      # Mandatory: yes
+      #
+      clientSecret: ""
+
+      # OAuth2 scopes for the proxy separated by spaces.
+      # Configured for Keycloak server by default.
+      # Type: string
+      # Mandatory: no
+      #
+      scopes: "openid profile roles"
+
+      # JSONPath (by jsonpath-ng) for taking username from the JSON returned from OAuth2 server by using userinfo path.
+      # Configured for Keycloak server by default.
+      # Type: string
+      # Mandatory: no
+      #
+      userJsonpath: "preferred_username"
+
+      # JSONPath (by jsonpath-ng) for taking information about entities (roles, groups, etc.)
+      # for Graylog roles and streams mapping from the JSON returned from OAuth2 server by using userinfo path.
+      # Configured for Keycloak server by default.
+      # Type: string
+      # Mandatory: no
+      #
+      rolesJsonpath: "realm_access.roles[*]"
+
+      # Allow skipping verification of the OAuth2 authorization server's certificate.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      skipVerify: false
+
+      # Configuration for a Secret contains CA certificate for OAuth2 authorization server.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # ca:
+        # Name of Secret with CA certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-ca
+
+        # Key (filename) in the Secret with CA certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: ca.crt
+
+      # Configuration for a client certificate.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # cert:
+        # Name of Secret with client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-cert
+
+        # Key (filename) in the Secret with client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: certificate.crt
+
+      # Configuration for a key for the certificate file.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # key:
+        # Name of Secret with key for the client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-key
+
+        # Key (filename) in the Secret with key for the client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: privateKey.key
+
+      # Allows to define a Kubernetes Secret for OAuth client secret.
+      # Type: object
+      # Mandatory: no
+      #
+      clientCredentialsSecret:
+        name: graylog-auth-proxy-secret
+        key: clientSecret
+
+    # Comma separated pre-created users in Graylog for which you do not need to rotate passwords.
+    # Type: string
+    # Mandatory: no
+    # Default: admin,auditViewer,operator,telegraf_operator,graylog-sidecar,graylog_api_th_user
+    #
+    preCreatedUsers: admin,auditViewer,operator,telegraf_operator,graylog-sidecar,graylog_api_th_user
+
+    # Interval in days between password rotation for non-pre-created users.
+    # Type: int
+    # Mandatory: no
+    # Default: 3
+    #
+    rotationPassInterval: 3
+
+    # Filter for mapping Graylog roles between LDAP or OAuth and Graylog users.
+    # Example: '"CN=otrk_admins,OU=OTRK_Groups,OU=IRQA_LDAP,DC=testad,DC=local":["Admin"] | "CN=otrk_users,OU=OTRK_Groups,OU=IRQA_LDAP,DC=testad,DC=local":["Reader","Operator"] | ["Reader"]'
+    # Type: string
+    # Mandatory: no
+    # Default: '[]'
+    #
+    roleMapping: '[]'
+
+    # Filter for sharing Graylog streams between LDAP or OAuth and Graylog users.
+    # Example: '"CN=otrk_admins,OU=OTRK_Groups,OU=IRQA_LDAP,DC=testad,DC=local":["Default Stream/manage","all events/view"] | "CN=otrk_users,OU=OTRK_Groups,OU=IRQA_LDAP,DC=testad,DC=local":["All events"] | ["System logs/view"]'
+    # Type: string
+    # Mandatory: no
+    #
+    streamMapping: ''
+
+##  Mandatory values for FluentD.
+#
+fluentd:
+  # Allow disabling create FluentD during deploy
+  # Type: boolean
+  # Mandatory: no
+  #
+  install: true
+
+  # A docker image to use for fluent daemon set.
+  # Type: string
+  # Mandatory: yes
+  #
+  # dockerImage: ghcr.io/netcracker/qubership-fluentd:main
+
+  configmapReload:
+    #
+    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    #
+    # The resources describe to compute resource requests and limits for single Pods.
+    # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    # Type: object
+    #
+    resources:
+      limits:
+        cpu: 50m
+        memory: 50Mi
+      requests:
+        cpu: 10m
+        memory: 10Mi
+
+  # List of tolerations applied to FluentD Pods.
+  # Type: array
+  # Mandatory: no
+  #
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+    - operator: "Exists"
+      effect: "NoExecute"
+    - operator: "Exists"
+      effect: "NoSchedule"
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+  # Allows specifying securityContext.privileged for FluentD container.
+  # Type: bool
+  # Default: false
+  #
+  securityContextPrivileged: false
+
+  # Allow defines which Nodes the Pods are scheduled on.
+  # nodeSelectorKey - key name
+  # nodeSelectorValue - value
+  # Default: not set
+  #
+  # Example:
+  # nodeSelectorKey: region
+  # nodeSelectorValue: primary
+
+  # Flag for enabling Graylog output.
+  # Type: boolean
+  # Default: true
+  #
+  # graylogOutput: true
+
+  # Graylog host.
+  # Type: string
+  # Example: 10.10.10.10 or graylog-service.graylog.svc
+  #
+  # graylogHost:
+
+  # Graylog port, for example: 12201
+  # Type: int
+  #
+  # graylogPort:
+
+  # Graylog protocol: tcp/udp
+  # Type: string
+  # Mandatory: no
+  #
+  graylogProtocol: tcp
+
+  # Graylog buffer flush interval
+  # Type: string
+  # Mandatory: no
+  #
+  # graylogBufferFlushInterval: 5s
+
+  # additionalVolumes allows configuration of additional volumes on the output DaemonSet definition.
+  # additionalVolumes specified will be appended to other volumes that are generated as a result of StorageSpec objects.
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volume-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  # additionalVolumes: {}
+
+  # additionalVolumeMounts allows configuration of additional VolumeMounts on the output DaemonSet definition.
+  # additionalVolumeMounts specified will be appended to other VolumeMounts in the prometheus container,
+  # that are generated as a result of StorageSpec objects.
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volumemount-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  # additionalVolumeMounts: {}
+
+  # FluentD configuration for TLS enabling for Graylog output.
+  # Works only for TCP Graylog protocol.
+  # Type: object
+  # Mandatory: no
+  #
+  tls:
+    # Allows enabling TLS for out-of-box Graylog GELF output managed by the operator.
+    # Type: bool
+    # Mandatory: no
+    # Default: false
+    #
+    enabled: false
+
+    # generateCerts:
+    #   enabled: false
+    #   secretName: fluentd-cert-manager-tls
+    #   clusterIssuerName: ""
+    #   duration: 365
+    #   renewBefore: 15
+
+    # Prevents OpenSSL from using the systems CA store.
+    # Type: bool
+    # Mandatory: no
+    # Default: false
+    #
+    noDefaultCA: false
+
+    # Any of :TLSv1, :TLSv1_1, :TLSv1_2.
+    # Type: string
+    # Mandatory: no
+    # Default: ":TLSv1_2"
+    #
+    version: ":TLSv1_2"
+
+    # Configuration for a custom CA store.
+    # If present, both secretKey and secretName fields are required.
+    # Type: object
+    # Mandatory: no
+    #
+    # ca:
+      # Name of Secret with CA certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-ca
+
+      # Key (filename) in the Secret with CA certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: ca.crt
+
+    # Configuration for a client certificate.
+    # If present, both secretKey and secretName fields are required.
+    # Type: object
+    # Mandatory: no
+    #
+    # cert:
+      # Name of Secret with client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-cert
+
+      # Key (filename) in the Secret with client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: certificate.crt
+
+    # Configuration for a key for the certificate file.
+    # If present, both secretKey and secretName fields are required.
+    # Type: object
+    # Mandatory: no
+    #
+    # key:
+      # Name of Secret with key for the client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-key
+
+      # Key (filename) in the Secret with key for the client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: privateKey.key
+
+    # Allows any ciphers to be used, may be insecure.
+    # Type: bool
+    # Mandatory: no
+    # Default: true
+    #
+    allCiphers: true
+
+    # Similar to rescue_network_errors in notifier.rb, allows SSL exceptions to be raised.
+    # Type: bool
+    # Mandatory: no
+    # Default: false
+    #
+    rescueSslErrors: false
+
+    # Disable peer verification.
+    # Type: bool
+    # Mandatory: no
+    # Default: false
+    #
+    noVerify: false
+
+  # Flag for using file storage instead of memory
+  # Type: bool
+  # Mandatory: no
+  # Default: false
+  #
+  fileStorage: false
+
+  # If "gzip" is set, FluentD compresses data records before writing to buffer chunks
+  # Type: string
+  # Mandatory: no
+  # Default: text
+  #
+  # compress: text
+
+  # (Deprecated) Max length of buffers queue
+  # Type: int
+  # Mandatory: no
+  #
+  queueLimitLength:
+
+  # The size limitation of output buffer
+  # Type: string
+  # Mandatory: no
+  # Default: 512MB
+  #
+  totalLimitSize: 512MB
+
+  # Adds additional custom fields/labels to every log message by using filter based on record_transformer plugin.
+  # This parameter will override existing fields if their keys match those specified in extraFields.
+  # This filter works after all other filters except the custom filter.
+  # Type: map[string]string
+  # Mandatory: no
+  #
+  # extraFields:
+  #   foo_key: foo_value
+  #   bar_key: bar_value
+
+  # FluentD custom filter configuration.
+  # Type: string
+  # Mandatory: no
+  #
+  customFilterConf:
+
+  # FluentD custom output configuration.
+  # Type: string
+  # Mandatory: no
+  #
+  customOutputConf:
+
+  # FluentD custom input configuration.
+  # Type: string
+  # Mandatory: no
+  #
+  customInputConf:
+
+  # FluentD filter for parsing bill-cycle-logs
+  # Type: bool
+  # Default: false
+  #
+  # billCycleConf: false
+
+  # The regexp for filter-concat
+  # Type: string
+  # Mandatory: no
+  # Default: /(^\[\d{4}\-\d{2}\-\d{2})|(^\{\")|(^*0m\d{2}\:\d{2}\:\d{2})/
+  #
+  multilineFirstLineRegexp:
+
+  # Enable input for system logs from /var/log/messages, /var/log/syslog or /var/log/journal.
+  # Type of system logs can be chosen by systemLogType parameter.
+  # Type: bool
+  # Default: true
+  #
+  systemLogging: true
+
+  # Path to exclude logs, it can have multiple values as an array.
+  # Type: array
+  # Default: []
+  #
+  # excludePath:
+  #   - "/var/log/pods/openshift-dns_dns-default*/dns/*.log"
+
+  # Type of system log, e.g. varlogmessages, varlogsyslog and systemd
+  # Type: string
+  # Default: varlogmessages
+  #
+  # systemLogType: varlogmessages
+
+  # Enable input for system audit logs from /var/log/audit/audit.log.
+  # Type: bool
+  # Default: true
+  #
+  systemAuditLogging: true
+
+  # Enable input for Kubernetes audit logs
+  # from /var/log/kubernetes/kube-apiserver-audit.log and /var/log/kubernetes/audit.log.
+  # Type: bool
+  # Default: true
+  #
+  kubeAuditLogging: true
+
+  # Enable input for Kubernetes APIServer audit logs
+  # from /var/log/kube-apiserver/audit.log for Kubernetes and /var/log/openshift-apiserver/audit.log for OpenShift.
+  # Type: bool
+  # Default: true
+  #
+  kubeApiserverAuditLogging: true
+
+  # Enable input for container logs from /var/logs/containers for Docker or /var/log/pods for other engines.
+  # Type: bool
+  # Default: true
+  #
+  containerLogging: true
+
+  # Set up a watch on pods on the API server for updates to metadata.
+  # Type: bool
+  # Default: true
+  #
+  # watchKubernetesMetadata: true
+
+  # Allow to add filter to parse json of Kubernetes events logs from Cloud Events Reader
+  # Type: string
+  # Default: json
+  #
+  cloudEventsReaderFormat: json
+
+  output:
+    loki:
+      # Flag for enabling Loki output.
+      # Type: boolean
+      # Default: false
+      # Mandatory: no
+      #
+      enabled: false
+
+      # Loki host.
+      # Type: string
+      # Example: http://10.10.10.10:3100 or http://loki-write.loki.svc:3100
+      # Mandatory: no
+      #
+      # host: http://loki-write.loki.svc:3100
+
+      # Loki tenant id.
+      # Type: string
+      # Example: fake
+      # Mandatory: no
+      #
+      # tenant:
+
+      # Authentication for Loki.
+      # Type: object
+      # Mandatory: no
+      #
+      # auth:
+      #   token:
+      #     name: loki-secret
+      #     key: token
+      #   user:
+      #     name: loki-secret
+      #     key: user
+      #   password:
+      #     name: loki-secret
+      #     key: password
+
+      # Static labels that added as stream labels.
+      # Type: string
+      # Default: {"job":"fluentd"}
+      # Mandatory: no
+      #
+      staticLabels: {"job":"fluentd"}
+
+      # Labels mappings that defines how to extract labels from each log record
+      # Type: string
+      # Mandatory: no
+      #
+      labelsMapping: |-
+        stream $.stream
+        container $.container
+        pod $.pod
+        namespace $.namespace
+        level $.level
+        hostname $.hostname
+        nodename $.kubernetes_host
+        request_id $.request_id
+        tenant_id $.tenant_id
+        addressTo $.addressTo
+        originating_bi_id $.originating_bi_id
+        spanId $.spanId
+
+      # TLS configuration for Loki output.
+      # Type: object
+      # Mandatory: no
+      #
+      tls:
+        # Allows enabling TLS for Loki output.
+        # Type: bool
+        # Mandatory: no
+        # Default: false
+        #
+        enabled: false
+
+        # Configuration for a custom CA store.
+        # If present, both secretKey and secretName fields are required.
+        # Type: object
+        # Mandatory: no
+        #
+        # ca:
+          # Name of Secret with CA certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretName: secret-ca
+
+          # Key (filename) in the Secret with CA certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretKey: ca.crt
+
+        # Configuration for a client certificate.
+        # If present, both secretKey and secretName fields are required.
+        # Type: object
+        # Mandatory: no
+        #
+        # cert:
+          # Name of Secret with client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretName: secret-cert
+
+          # Key (filename) in the Secret with client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretKey: certificate.crt
+
+        # Configuration for a key for the certificate file.
+        # If present, both secretKey and secretName fields are required.
+        # Type: object
+        # Mandatory: no
+        #
+        # key:
+          # Name of Secret with key for the client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretName: secret-key
+
+          # Key (filename) in the Secret with key for the client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretKey: privateKey.key
+
+        # Allows any ciphers to be used, may be insecure.
+        # Type: bool
+        # Mandatory: no
+        # Default: true
+        #
+        allCiphers: true
+
+        # Any of :TLSv1, :TLSv1_1, :TLSv1_2.
+        # Type: string
+        # Mandatory: no
+        # Default: no value
+        #
+        # version: ":TLSv1_2"
+
+        # Force certificate validation.
+        # Type: bool
+        # Mandatory: no
+        # Default: false
+        #
+        noVerify: false
+
+      # Additional configuration parameters for Loki output.
+      # Buffer can be configured here and other available parameters of FluentD Loki output plugin.
+      # See all the parameters here: https://github.com/grafana/loki/blob/main/clients/cmd/fluentd/lib/fluent/plugin/out_loki.rb
+      # Type: string
+      # Mandatory: no
+      #
+      # extraParams: |
+      #   extract_kubernetes_labels false
+      #   remove_keys []
+      #   custom_headers header:value
+
+  ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
+  #
+  securityResources:
+    name: logging-fluentd
+    install: false
+
+  ## Pod monitor for FluentD
+  ## Type: object
+  ## Mandatory: no
+  #
+  podMonitor:
+    # Allow change metrics scrape timeout
+    # Type: string
+    # Mandatory: no
+    #
+    scrapeTimeout: 10s
+    # Allow change metrics scrape interval
+    # Type: string
+    # Mandatory: no
+    #
+    scrapeInterval: 30s
+
+  # PriorityClassName assigned to the Pods to prevent them from evicting.
+  # Type: string
+  # priorityClassName: "priorityClassName"
+
+##  Mandatory values for FluentBit.
+#
+fluentbit:
+  # Allow disabling create FluentBit during deploy
+  # Type: boolean
+  # Mandatory: no
+  #
+  install: false
+
+  # A docker image to use for FluentBit daemon set.
+  # Type: string
+  # Mandatory: no
+  #
+  # dockerImage: fluent/fluent-bit:3.0.6
+
+  configmapReload:
+    #
+    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    #
+    # The resources describe to compute resource requests and limits for single Pods.
+    # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    # Type: object
+    #
+    resources:
+      limits:
+        cpu: 50m
+        memory: 50Mi
+      requests:
+        cpu: 10m
+        memory: 10Mi
+
+  # List of tolerations applied to FluentBit Pods.
+  # Type: array
+  # Mandatory: no
+  #
+  tolerations:
+    - key: node-role.kubernetes.io/master
+      operator: Exists
+    - operator: "Exists"
+      effect: "NoExecute"
+    - operator: "Exists"
+      effect: "NoSchedule"
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  resources:
+    requests:
+      cpu: 50m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 512Mi
+
+  # Allow defines which Nodes the Pods are scheduled on.
+  # nodeSelectorKey - key name
+  # nodeSelectorValue - value
+  # Default: not set
+  #
+  # Example:
+  # nodeSelectorKey: region
+  # nodeSelectorValue: primary
+
+  # Flag for enabling Graylog output.
+  # Type: boolean
+  # Default: true
+  #
+  # graylogOutput: true
+
+  # Graylog host.
+  # Type: string
+  # Example: 10.10.10.10 or graylog-service.graylog.svc
+  #
+  # graylogHost:
+
+  # Graylog port, for example: 12201
+  # Type: int
+  #
+  # graylogPort:
+
+  # Graylog protocol: tcp/udp/etc
+  # Type: string
+  # Mandatory: no
+  #
+  graylogProtocol: tcp
+
+  # Allow to exclude some logs of pods/containers
+  # Type: string
+  # Mandatory: no
+  #
+  excludePath: ""
+
+  output:
+    loki:
+      # Flag for enabling Loki output.
+      # Type: boolean
+      # Default: false
+      # Mandatory: no
+      #
+      enabled: false
+
+      # Loki host.
+      # Type: string
+      # Example: 10.10.10.10 or loki-write.loki.svc
+      # Mandatory: no
+      #
+      # host: loki-write.loki.svc
+
+      # Loki tenant id.
+      # Type: string
+      # Example: fake
+      # Mandatory: no
+      #
+      # tenant:
+
+      # Authentication for Loki.
+      # Type: object
+      # Mandatory: no
+      #
+      # auth:
+      #   token:
+      #     name: loki-secret
+      #     key: token
+      #   user:
+      #     name: loki-secret
+      #     key: user
+      #   password:
+      #     name: loki-secret
+      #     key: password
+
+      # Static labels that added as stream labels.
+      # Type: string
+      # Default: job=fluentbit
+      # Mandatory: no
+      #
+      staticLabels: job=fluentbit
+
+      # Labels mappings that defines how to extract labels from each log record. Value should contain a JSON object.
+      # Type: string
+      # Mandatory: no
+      #
+      labelsMapping: |-
+        {
+            "container": "container",
+            "pod": "pod",
+            "namespace": "namespace",
+            "stream": "stream",
+            "level": "level",
+            "hostname": "hostname",
+            "nodename": "nodename",
+            "request_id": "request_id",
+            "tenant_id": "tenant_id",
+            "addressTo": "addressTo",
+            "originating_bi_id": "originating_bi_id",
+            "spanId": "spanId"
+        }
+
+      # TLS configuration for Loki output.
+      # Type: object
+      # Mandatory: no
+      #
+      tls:
+        # Allows enabling TLS for Loki output.
+        # Type: bool
+        # Mandatory: no
+        # Default: false
+        #
+        enabled: false
+
+        # Configuration for a custom CA store.
+        # If present, both secretKey and secretName fields are required.
+        # Type: object
+        # Mandatory: no
+        #
+        # ca:
+          # Name of Secret with CA certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretName: secret-ca
+
+          # Key (filename) in the Secret with CA certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretKey: ca.crt
+
+        # Configuration for a client certificate.
+        # If present, both secretKey and secretName fields are required.
+        # Type: object
+        # Mandatory: no
+        #
+        # cert:
+          # Name of Secret with client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretName: secret-cert
+
+          # Key (filename) in the Secret with client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretKey: certificate.crt
+
+        # Configuration for a key for the certificate file.
+        # If present, both secretKey and secretName fields are required.
+        # Type: object
+        # Mandatory: no
+        #
+        # key:
+          # Name of Secret with key for the client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretName: secret-key
+
+          # Key (filename) in the Secret with key for the client certificate.
+          # Type: string
+          # Mandatory: yes
+          #
+          # secretKey: privateKey.key
+
+        # Force certificate validation.
+        # Type: bool
+        # Mandatory: no
+        # Default: true
+        #
+        verify: true
+
+        # Optional password for private key file.
+        # Type: string
+        # Mandatory: no
+        #
+        # keyPasswd: secret
+
+      # Additional configuration parameters for Loki output.
+      # See docs: https://docs.fluentbit.io/manual/pipeline/outputs/loki#configuration-parameters
+      # Type: string
+      # Mandatory: no
+      #
+      extraParams: |
+          workers                2
+          Retry_Limit            32
+          storage.total_limit_size  5000M
+          net.connect_timeout 20
+
+  # additionalVolumes allows configuration of additional volumes on the output DaemonSet definition.
+  # additionalVolumes specified will be appended to other volumes that are generated as a result of StorageSpec objects.
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volume-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  # additionalVolumes: []
+  #
+  # Example for App-deployer:
+  # fluentbit.additionalVolumes: '''[{"name":"datadocker","hostPath":{"path":"/data/docker","type":""}}]'''
+
+  # additionalVolumeMounts allows configuration of additional VolumeMounts on the output DaemonSet definition.
+  # additionalVolumeMounts specified will be appended to other VolumeMounts in the prometheus container,
+  # that are generated as a result of StorageSpec objects.
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.18/#volumemount-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  # additionalVolumeMounts: []
+  #
+  # Example for App-deployer:
+  # fluentbit.additionalVolumeMounts: '''[{"name":"datadocker","mountPath":"/data/docker"}]'''
+
+  # Fluent-bit configuration for TLS enabling for Graylog output.
+  # Works only for TCP Graylog protocol.
+  # Type: object
+  # Mandatory: no
+  #
+  tls:
+    # Allows enabling TLS for out-of-box Graylog GELF output managed by the operator.
+    # Type: bool
+    # Mandatory: no
+    # Default: false
+    #
+    enabled: false
+
+    # generateCerts:
+    #   enabled: false
+    #   secretName: fluentbit-cert-manager-tls
+    #   clusterIssuerName: ""
+    #   duration: 365
+    #   renewBefore: 15
+
+    # Configuration for a custom CA store.
+    # If present, both secretKey and secretName fields are required.
+    # Type: object
+    # Mandatory: no
+    #
+    # ca:
+      # Name of Secret with CA certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-ca
+
+      # Key (filename) in the Secret with CA certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: ca.crt
+
+    # Configuration for a client certificate.
+    # If present, both secretKey and secretName fields are required.
+    # Type: object
+    # Mandatory: no
+    #
+    # cert:
+      # Name of Secret with client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-cert
+
+      # Key (filename) in the Secret with client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: certificate.crt
+
+    # Configuration for a key for the certificate file.
+    # If present, both secretKey and secretName fields are required.
+    # Type: object
+    # Mandatory: no
+    #
+    # key:
+      # Name of Secret with key for the client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretName: secret-key
+
+      # Key (filename) in the Secret with key for the client certificate.
+      # Type: string
+      # Mandatory: yes
+      #
+      # secretKey: privateKey.key
+
+    # Force certificate validation.
+    # Type: bool
+    # Mandatory: no
+    # Default: true
+    #
+    verify: true
+
+    # Optional password for private key file.
+    # Type: string
+    # Mandatory: no
+    #
+    # keyPasswd: secret
+
+
+  # The size limitation of output buffer
+  # Type: string
+  # Mandatory: no
+  # Default: 1024M
+  #
+  totalLimitSize: 1024M
+
+  # The size limitation of backlog data
+  # See storage.backlog.mem_limit in https://docs.fluentbit.io/manual/administration/buffering-and-storage#service-section-configuration
+  # Type: string
+  # Mandatory: no
+  # Default: 5M
+  #
+  memBufLimit: 5M
+
+  # Adds additional custom fields/labels to every log message by using filter based on record_modifier plugin.
+  # This filter works after all other filters except the custom filter.
+  # Type: map[string]string
+  # Mandatory: no
+  #
+  # extraFields:
+  #   foo_key: foo_value
+  #   bar_key: bar_value
+
+  # FluentBit custom filter configuration.
+  # Type: string
+  # Mandatory: no
+  # Note: it's very important to keep the indents
+  # Example:
+  #  customFilterConf: |-
+  #      [FILTER]
+  #          Name record_modifier
+  #          Match *
+  #          Record testField fluent-bit
+  customFilterConf:
+
+  # FluentBit custom output configuration.
+  # Type: string
+  # Mandatory: no
+  # Note: it's very important to keep the indents
+  # Example:
+  #  customOutputConf: |-
+  #      [OUTPUT]
+  #          Name null
+  #          Match fluent.*
+  customOutputConf:
+
+  # FluentBit custom input configuration.
+  # Type: string
+  # Mandatory: no
+  # Note: it's very important to keep the indents
+  # Example:
+  #  customInputConf: |-
+  #      [INPUT]
+  #          Name   <name>
+  customInputConf: ~
+
+  # FluentBit custom lua script configuration.
+  # Type: map
+  # Mandatory: no
+  # Note: it's very important to keep the indents
+  # Example:
+  #  customLuaScriptConf:
+  #    "scriptname.lua": |-
+  #      <script_content>
+  customLuaScriptConf: {}
+
+  # FluentBit filter for parsing bill-cycle-logs
+  # Type: bool
+  # Default: false
+  #
+  # billCycleConf: false
+
+  # The regexp for the first line of multiline filter
+  # Type: string
+  # Mandatory: no
+  # Default: "/^(\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/"
+  #
+  multilineFirstLineRegexp: ~~
+
+  # The regexp for the other lines of multiline filter
+  # Type: string
+  # Mandatory: no
+  # Default: "/^(\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/"
+  #
+  multilineOtherLinesRegexp: ~
+
+  # Enable input for system logs from /var/log/messages, /var/log/syslog or /var/log/journal.
+  # Type of system logs can be chosen by systemLogType parameter.
+  # Type: bool
+  # Default: false
+  #
+  systemLogging: true
+
+  # Type of system log, e.g. varlogmessages, varlogsyslog and systemd
+  # Type: string
+  #
+  # systemLogType: varlogmessages
+
+  # Enable input for system audit logs from /var/log/audit/audit.log.
+  # Type: bool
+  # Default: true
+  #
+  systemAuditLogging: true
+
+  # Enable input for Kubernetes audit logs
+  # from /var/log/kubernetes/kube-apiserver-audit.log and /var/log/kubernetes/audit.log.
+  # Type: bool
+  # Default: true
+  #
+  kubeAuditLogging: true
+
+  # Enable input for Kubernetes APIServer audit logs
+  # from /var/log/kube-apiserver/audit.log for Kubernetes and /var/log/openshift-apiserver/audit.log for OpenShift.
+  # Type: bool
+  # Default: true
+  #
+  kubeApiserverAuditLogging: true
+
+  # Enable input for container logs from /var/logs/containers for Docker or /var/log/pods for other engines.
+  # Type: bool
+  # Default: true
+  #
+  containerLogging: true
+
+  # Set up a watch on pods on the API server for updates to metadata.
+  # Type: bool
+  # Default: true
+  #
+  # watchKubernetesMetadata: true
+
+  # Allows specifying securityContext.privileged for FluentBit container.
+  # Type: bool
+  # Default: false
+  #
+  securityContextPrivileged: false
+
+  ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
+  #
+  securityResources:
+    name: logging-fluentbit
+    install: false
+
+  ## Pod monitor for FluentBit
+  ## Type: object
+  ## Mandatory: no
+  #
+  podMonitor:
+    # Allow change metrics scrape timeout
+    # Type: string
+    # Mandatory: no
+    #
+    scrapeTimeout: 10s
+    # Allow change metrics scrape interval
+    # Type: string
+    # Mandatory: no
+    #
+    scrapeInterval: 30s
+
+  # PriorityClassName assigned to the Pods to prevent them from evicting.
+  # Type: string
+  # priorityClassName: "priorityClassName"
+
+  aggregator:
+    # Allow disabling create FluentBit aggregator deployment during deploy
+    # Type: boolean
+    # Mandatory: no
+    #
+    install: false
+
+    # A docker image to use for FluentBit aggregator deployment.
+    # Type: string
+    # Mandatory: no
+    #
+    # dockerImage: fluent/fluent-bit:3.0.6
+
+    configmapReload:
+    # A docker image to use for FluentBit aggregator configmap reload sidecar.
+    # Type: string
+    # Mandatory: yes
+    #
+    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    #
+    # The resources describe to compute resource requests and limits for single Pods.
+    # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    # Type: object
+    #
+      resources:
+        limits:
+          cpu: 50m
+          memory: 50Mi
+        requests:
+          cpu: 10m
+          memory: 10Mi
+
+
+    # A number of replicas for FluentBit aggregator deployment.
+    # Type: int
+    # Mandatory: no
+    # Default: 2
+    #
+    replicas: 2
+
+    # List of tolerations applied to FluentBit aggregator Pods.
+    # Type: array
+    # Mandatory: no
+    #
+    tolerations: []
+
+    # The amount of time the operator waits for Aggregator pod(s) to start, in minutes
+    # Type: int
+    # Default: 8
+    #
+    startupTimeout: 8
+
+    # Allows installing PVCs for Aggregator pods
+    # Type: object
+    # By default storage of aggregator has emptyDir type
+    #
+    # volume:
+    # Flag to installing PVC for Aggregator logs
+    # Type: boolean
+    # Default: false
+    #
+    # bind: false
+
+    # Aggregator PVC storage class name.
+    # Type: string
+    # Default: ""
+    #
+    # storageClassName: ""
+
+    # Storage size limit of PVC, e.g. '400Mi'
+    # Default: 2Gi
+    #
+    # storageSize: 2Gi
+
+    # The resources describe to compute resource requests and limits for single Pods.
+    # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+    # Type: object
+    #
+    resources:
+      requests:
+        cpu: 500m
+        memory: 512Mi
+      limits:
+        cpu: 2
+        memory: 2Gi
+
+    # Allow defines which Nodes the Pods are scheduled on.
+    # nodeSelectorKey - key name
+    # nodeSelectorValue - value
+    # Default: not set
+    #
+    # Example:
+    # nodeSelectorKey: region
+    # nodeSelectorValue: primary
+
+    # Flag for enabling Graylog output.
+    # Type: boolean
+    # Default: true
+    #
+    # graylogOutput: true
+
+    # Graylog host.
+    # Type: string
+    # Example: 10.10.10.10 or graylog-service.graylog.svc
+    #
+    # graylogHost:
+
+    # Graylog port, for example: 12201
+    # Type: int
+    #
+    # graylogPort:
+
+    # Graylog protocol: tcp/udp/etc
+    # Type: string
+    # Mandatory: no
+    #
+    graylogProtocol: tcp
+
+    # Fluent-bit configuration for TLS enabling for Graylog output.
+    # Works only for TCP Graylog protocol.
+    # Type: object
+    # Mandatory: no
+    #
+    tls:
+      # Allows enabling TLS for out-of-box Graylog GELF output managed by the operator.
+      # Type: bool
+      # Mandatory: no
+      # Default: false
+      #
+      enabled: false
+
+      # generateCerts:
+      #   enabled: false
+      #   secretName: fluentbit-aggregator-cert-manager-tls
+      #   clusterIssuerName: ""
+      #   duration: 365
+      #   renewBefore: 15
+
+      # Configuration for a custom CA store.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # ca:
+        # Name of Secret with CA certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-ca
+
+        # Key (filename) in the Secret with CA certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: ca.crt
+
+      # Configuration for a client certificate.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # cert:
+        # Name of Secret with client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-cert
+
+        # Key (filename) in the Secret with client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: certificate.crt
+
+      # Configuration for a key for the certificate file.
+      # If present, both secretKey and secretName fields are required.
+      # Type: object
+      # Mandatory: no
+      #
+      # key:
+        # Name of Secret with key for the client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretName: secret-key
+
+        # Key (filename) in the Secret with key for the client certificate.
+        # Type: string
+        # Mandatory: yes
+        #
+        # secretKey: privateKey.key
+
+      # Force certificate validation.
+      # Type: bool
+      # Mandatory: no
+      # Default: true
+      #
+      verify: true
+
+      # Optional password for private key file.
+      # Type: string
+      # Mandatory: no
+      #
+      # keyPasswd: secret
+
+    output:
+      loki:
+        # Flag for enabling Loki output.
+        # Type: boolean
+        # Default: false
+        # Mandatory: no
+        #
+        enabled: false
+
+        # Loki host.
+        # Type: string
+        # Example: 10.10.10.10 or loki-write.loki.svc
+        # Mandatory: no
+        #
+        # host: loki-write.loki.svc
+
+        # Authentication for Loki.
+        # Type: object
+        # Mandatory: no
+        #
+        # auth:
+        #   token:
+        #     name: loki-secret
+        #     key: token
+        #   user:
+        #     name: loki-secret
+        #     key: user
+        #   password:
+        #     name: loki-secret
+        #     key: password
+
+        # Static labels that added as stream labels.
+        # Type: string
+        # Default: job=fluentbit
+        # Mandatory: no
+        #
+        staticLabels: job=fluentbit
+
+        # Labels mappings that defines how to extract labels from each log record. Value should contain a JSON object.
+        # Type: string
+        # Mandatory: no
+        #
+        labelsMapping: |-
+          {
+              "container": "container",
+              "pod": "pod",
+              "namespace": "namespace",
+              "stream": "stream",
+              "level": "level",
+              "hostname": "hostname",
+              "nodename": "nodename",
+              "request_id": "request_id",
+              "tenant_id": "tenant_id",
+              "addressTo": "addressTo",
+              "originating_bi_id": "originating_bi_id",
+              "spanId": "spanId"
+          }
+
+        # TLS configuration for Loki output.
+        # Type: object
+        # Mandatory: no
+        #
+        tls:
+          # Allows enabling TLS for Loki output.
+          # Type: bool
+          # Mandatory: no
+          # Default: false
+          #
+          enabled: false
+
+          # Configuration for a custom CA store.
+          # If present, both secretKey and secretName fields are required.
+          # Type: object
+          # Mandatory: no
+          #
+          # ca:
+            # Name of Secret with CA certificate.
+            # Type: string
+            # Mandatory: yes
+            #
+            # secretName: secret-ca
+
+            # Key (filename) in the Secret with CA certificate.
+            # Type: string
+            # Mandatory: yes
+            #
+            # secretKey: ca.crt
+
+          # Configuration for a client certificate.
+          # If present, both secretKey and secretName fields are required.
+          # Type: object
+          # Mandatory: no
+          #
+          # cert:
+            # Name of Secret with client certificate.
+            # Type: string
+            # Mandatory: yes
+            #
+            # secretName: secret-cert
+
+            # Key (filename) in the Secret with client certificate.
+            # Type: string
+            # Mandatory: yes
+            #
+            # secretKey: certificate.crt
+
+          # Configuration for a key for the certificate file.
+          # If present, both secretKey and secretName fields are required.
+          # Type: object
+          # Mandatory: no
+          #
+          # key:
+            # Name of Secret with key for the client certificate.
+            # Type: string
+            # Mandatory: yes
+            #
+            # secretName: secret-key
+
+            # Key (filename) in the Secret with key for the client certificate.
+            # Type: string
+            # Mandatory: yes
+            #
+            # secretKey: privateKey.key
+
+          # Force certificate validation.
+          # Type: bool
+          # Mandatory: no
+          # Default: true
+          #
+          verify: true
+
+          # Optional password for private key file.
+          # Type: string
+          # Mandatory: no
+          #
+          # keyPasswd: secret
+
+        # Additional configuration parameters for Loki output.
+        # See docs: https://docs.fluentbit.io/manual/pipeline/outputs/loki#configuration-parameters
+        # Type: string
+        # Mandatory: no
+        #
+        extraParams: |
+            workers                2
+            Retry_Limit            32
+            storage.total_limit_size  5000M
+            net.connect_timeout 20
+
+    # The size limitation of output buffer
+    # Type: string
+    # Mandatory: no
+    # Default: 1024M
+    #
+    totalLimitSize: 1024M
+
+    # The size limitation of backlog data
+    # See storage.backlog.mem_limit in https://docs.fluentbit.io/manual/administration/buffering-and-storage#service-section-configuration
+    # Type: string
+    # Mandatory: no
+    # Default: 5M
+    #
+    memBufLimit: 5M
+
+    # Adds additional custom fields/labels to every log message by using filter based on record_modifier plugin.
+    # This filter works after all other filters except the custom filter.
+    # Type: map[string]string
+    # Mandatory: no
+    #
+    # extraFields:
+    #   foo_key: foo_value
+    #   bar_key: bar_value
+
+    # FluentBit aggregator custom filter configuration.
+    # Type: string
+    # Mandatory: no
+    # Note: it's very important to keep the indents
+    # Example:
+    #  customFilterConf: |-
+    #      [FILTER]
+    #          Name record_modifier
+    #          Match *
+    #          Record testField fluent-bit
+    customFilterConf: ~
+
+    # FluentBit aggregator custom output configuration.
+    # Type: string
+    # Mandatory: no
+    # Note: it's very important to keep the indents
+    # Example:
+    #  customOutputConf: |-
+    #      [OUTPUT]
+    #          Name null
+    #          Match fluent.*
+    customOutputConf: ~
+
+    # FluentBit custom lua script configuration.
+    # Type: map
+    # Mandatory: no
+    # Note: it's very important to keep the indents
+    # Example:
+    #  customLuaScriptConf:
+    #    "scriptname.lua": |-
+    #      <script_content>
+    customLuaScriptConf: {}
+
+    # The regexp for the first line of multiline filter
+    # Type: string
+    # Mandatory: no
+    # Default: "/^(\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/"
+    #
+    multilineFirstLineRegexp: ~
+
+    # The regexp for the other lines of multiline filter
+    # Type: string
+    # Mandatory: no
+    # Default: "/^(\\[\\d{4}\\-\\d{2}\\-\\d{2}|\\{\\\"|\\u001b\\[.{1,5}m\\d{2}\\:\\d{2}\\:\\d{2}).*/"
+    #
+    multilineOtherLinesRegexp: ~
+
+    ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
+    #
+    securityResources:
+      name: logging-fluentbit-aggregator
+      install: false
+
+    # PriorityClassName assigned to the Pods to prevent them from evicting.
+    # Type: string
+    # priorityClassName: "priorityClassName"
+
+##  Mandatory values for Cloud Events Reader.
+#
+cloudEventsReader:
+  # Allow disabling create Cloud Events Reader during deploy
+  # Type: boolean
+  # Mandatory: no
+  #
+  install: true
+
+  # A docker image to use for Cloud Events Reader deployment.
+  # Type: string
+  # Mandatory: yes
+  #
+  # dockerImage: ghcr.io/netcracker/k8s-events-reader:main
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
+
+  # Allow defines which Nodes the Pods are scheduled on.
+  # nodeSelectorKey - key name
+  # nodeSelectorValue - value
+  # Default: not set
+  #
+  # Example:
+  # nodeSelectorKey: region
+  # nodeSelectorValue: primary
+
+  # PriorityClassName assigned to the Pods to prevent them from evicting.
+  # Type: string
+  # priorityClassName: "priorityClassName"
+
+  # Command line arguments
+  # Type: array
+  # Mandatory: no
+  #
+  # args:
+  #   - "-workers=2"
+  #   - "-namespace=logging"
+  #   - "-namespace=monitoring"
+  #   - "-format={\"time\":\"{{.LastTimestamp.Format \"2006-01-02T15:04:05Z\"}}\""
+
+##  Mandatory values for Integration Tests.
+#
+integrationTests:
+  # Allow disabling create Integration Tests Pod during deploy
+  # Type: boolean
+  # Mandatory: no
+  #
+  install: false
+
+  # Service name for Integration Tests.
+  # Type: string
+  #
+  service:
+    name: logging-integration-tests-runner
+
+  # Image of integration-tests
+  # image: ghcr.io/netcracker/qubership-logging-integration-tests:main
+
+  # Tags for Integration Tests.
+  # Type: string
+  # Example: smoke
+  # Possible values: smoke, graylog
+  #
+  tags: smoke
+
+  # The parameter specifies the timeout before the start of integration tests.
+  # Type: integer
+  # Mandatory: no
+  # Default: 100
+  #
+  timeoutBeforeStart: 100
+
+  # Flag for specify kind of Graylog (internal in cloud or external on VM).
+  # Type: string
+  # Possible values: "true", "false"
+  externalGraylogServer: "true"
+
+  # Graylog protocol.
+  # Type: string
+  # Example: http or https
+  #
+  graylogProtocol: http
+
+  # Graylog host.
+  # Type: string
+  # Example: 10.10.10.10 or graylog-service.graylog.svc
+  #
+  # graylogHost:
+
+  # Graylog port
+  # Type: int
+  # Example: 80 or 443
+  #
+  # graylogPort:
+
+  # The resources describe to compute resource requests and limits for Integration Tests Pod.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  resources:
+    requests:
+      memory: 128Mi
+      cpu: 100m
+    limits:
+      memory: 256Mi
+      cpu: 200m
+
+  statusWriting:
+    enabled: false
+    isShortStatusMessage: true
+    onlyIntegrationTests: true
+    customResourcePath: "logging.qubership.org/v1alpha1/logging-operator/loggingservices/logging-service"
+
+  # PriorityClassName assigned to the Pods to prevent them from evicting.
+  # Type: string
+  # priorityClassName: "priorityClassName"
+
+  # The parameter specifies the user for ssh login to VM.
+  # Type: string
+  # Example: ubuntu
+  #
+  vmUser: ""
+
+  # The parameter specifies the ssh key for login to VM.
+  # Type: string
+  # Example:
+  # sshKey: |
+  #  -----BEGIN RSA PRIVATE KEY-----
+  #  MII.................................g==
+  #  -----END RSA PRIVATE KEY-----
+  #
+  sshKey: ""

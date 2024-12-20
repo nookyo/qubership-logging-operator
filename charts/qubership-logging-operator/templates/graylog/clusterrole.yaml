@@ -1,0 +1,30 @@
+{{- if .Values.createClusterAdminEntities }}
+{{- if .Values.graylog.install }}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: psp:oob-privileged-psp
+  labels:
+    app.kubernetes.io/name: oob-privileged-psp
+    app.kubernetes.io/component: graylog
+    app.kubernetes.io/part-of: logging
+  {{- if .Values.graylog.labels }}
+    {{- toYaml .Values.graylog.labels | nindent 4 }}
+  {{- end }}
+  {{- if .Values.graylog.annotations }}
+  annotations:
+    {{- toYaml .Values.graylog.annotations | nindent 4 }}
+  {{- end }}
+rules:
+  {{- if $.Capabilities.APIVersions.Has "policy/v1beta1" }}
+  - apiGroups:
+      - extensions
+    resources:
+      - podsecuritypolicies
+    resourceNames:
+      - oob-privileged-psp # the psp we are giving access to
+    verbs:
+      - use
+  {{- end }}
+{{- end }}
+{{- end }}
