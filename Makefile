@@ -111,7 +111,7 @@ generate: controller-gen
 	$(CONTROLLER_GEN) crd:crdVersions={v1} \
 					object:headerFile="hack/boilerplate.go.txt" \
 					paths="./api/v1alpha1" \
-					output:artifacts:config=charts/logging-operator/crds/
+					output:artifacts:config=charts/qubership-logging-operator/crds/
 	chmod +x ./scripts/build/append-operator-version.sh
 	VERSION=$(VERSION) ./scripts/build/append-operator-version.sh
 
@@ -251,7 +251,7 @@ prepare-charts:
 	cp -R charts $(HELM_DIR)/
 
 	# Create directories to copy CRDs
-	mkdir -p "$(CRDS_DIR)/logging-operator"
+	mkdir -p "$(CRDS_DIR)/qubership-logging-operator"
 
 # Archive Helm chart separately from application manifest
 .PHONY: archive-helm-chart
@@ -270,7 +270,7 @@ archive-crds:
 	cp docs/user-guides/manual-create-crds.md "${BUILD_DIR}"/_crds/README.md
 
 	# Copy CRDs from different places in helm chart and sub-charts
-	cp charts/logging-operator/crds/* "${BUILD_DIR}/_crds/logging-operator/"
+	cp charts/qubership-logging-operator/crds/* "${BUILD_DIR}/_crds/qubership-logging-operator/"
 
 	# Navigate to dir to avoid unnecessary directories in result archive\
 	# name like: logging-operator-14.20.0-crds.zip
