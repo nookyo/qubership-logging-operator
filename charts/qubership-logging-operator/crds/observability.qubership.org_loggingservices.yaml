@@ -5,8 +5,16 @@ metadata:
   annotations:
     controller-gen.kubebuilder.io/version: v0.16.5
     logging-operator.logging.qubership.org/version: 14.20.0
+    logging-operator.logging.qubership.org/version: 14.20.0
+    logging-operator.logging.qubership.org/version: 14.20.0
   labels:
     app.kubernetes.io/component: logging-operator
+    app.kubernetes.io/part-of: logging
+  labels:
+    app.kubernetes.io/component: qubership-logging-operator
+    app.kubernetes.io/part-of: logging
+  labels:
+    app.kubernetes.io/component: qubership-logging-operator
     app.kubernetes.io/part-of: logging
   name: loggingservices.logging.qubership.org
 spec:
