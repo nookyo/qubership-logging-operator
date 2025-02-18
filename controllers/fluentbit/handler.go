@@ -40,6 +40,7 @@ func (r *FluentbitReconciler) handleDaemonSet(cr *loggingService.LoggingService)
 			e.Spec.Template.Spec.NodeSelector = m.Spec.Template.Spec.NodeSelector
 			e.Spec.Template.Spec.Volumes = m.Spec.Template.Spec.Volumes
 			e.Spec.Template.Spec.Tolerations = m.Spec.Template.Spec.Tolerations
+			e.Spec.Template.Spec.Affinity = m.Spec.Template.Spec.Affinity
 			if err = r.UpdateResource(e); err != nil {
 				return err
 			}

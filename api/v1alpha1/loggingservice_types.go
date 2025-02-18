@@ -90,6 +90,7 @@ type Graylog struct {
 	AuthProxy                                *AuthProxy                   `json:"authProxy,omitempty"`
 	TLS                                      *GraylogTLS                  `json:"tls,omitempty"`
 	OpenSearch                               *OpenSearch                  `json:"openSearch,omitempty"`
+	Affinity                                 *v1.Affinity                 `json:"affinity,omitempty"`
 	Annotations                              map[string]string            `json:"annotations,omitempty"`
 	Labels                                   map[string]string            `json:"labels,omitempty"`
 	NodeSelectorValue                        string                       `json:"nodeSelectorValue,omitempty"`
@@ -194,6 +195,7 @@ type Fluentd struct {
 	ExcludePath                []string                 `json:"excludePath,omitempty"`
 	AdditionalVolumes          []v1.Volume              `json:"additionalVolumes,omitempty"`
 	Tolerations                []v1.Toleration          `json:"tolerations,omitempty"`
+	Affinity                   *v1.Affinity             `json:"affinity,omitempty"`
 	QueueLimitLength           int                      `json:"queueLimitLength,omitempty"`
 	GraylogPort                int                      `json:"graylogPort,omitempty"`
 	BillCycleConf              bool                     `json:"billCycleConf,omitempty"`
@@ -240,6 +242,7 @@ type Fluentbit struct {
 	AdditionalVolumes         []v1.Volume              `json:"additionalVolumes,omitempty"`
 	AdditionalVolumeMounts    []v1.VolumeMount         `json:"additionalVolumeMounts,omitempty"`
 	Tolerations               []v1.Toleration          `json:"tolerations,omitempty"`
+	Affinity                  *v1.Affinity             `json:"affinity,omitempty"`
 	GraylogPort               int                      `json:"graylogPort,omitempty"`
 	SecurityContextPrivileged bool                     `json:"securityContextPrivileged,omitempty"`
 	WatchKubernetesMetadata   bool                     `json:"watchKubernetesMetadata,omitempty"`
@@ -278,6 +281,7 @@ type FluentbitAggregator struct {
 	CustomLuaScriptConf       map[string]string        `json:"customLuaScriptConf,omitempty"`
 	TLS                       FluentbitTLS             `json:"tls,omitempty"`
 	Tolerations               []v1.Toleration          `json:"tolerations,omitempty"`
+	Affinity                  *v1.Affinity             `json:"affinity,omitempty"`
 	StartupTimeout            int                      `json:"startupTimeout,omitempty"`
 	Replicas                  int                      `json:"replicas,omitempty"`
 	GraylogPort               int                      `json:"graylogPort,omitempty"`
@@ -294,6 +298,7 @@ type CloudEventsReader struct {
 	PriorityClassName string                   `json:"priorityClassName,omitempty"`
 	NodeSelectorKey   string                   `json:"nodeSelectorKey,omitempty"`
 	NodeSelectorValue string                   `json:"nodeSelectorValue,omitempty"`
+	Affinity          *v1.Affinity             `json:"affinity,omitempty"`
 	Labels            map[string]string        `json:"labels,omitempty"`
 	Annotations       map[string]string        `json:"annotations,omitempty"`
 	Args              []string                 `json:"args,omitempty"`
@@ -301,7 +306,7 @@ type CloudEventsReader struct {
 }
 
 // MonitoringAgentLoggingPlugin contains MonitoringAgentLoggingPlugin-specific configuration
-//+kubebuilder:deprecatedversion:warning="MonitoringAgentLoggingPlugin section is no longer need and use"
+// +kubebuilder:deprecatedversion:warning="MonitoringAgentLoggingPlugin section is no longer need and use"
 type MonitoringAgentLoggingPlugin struct {
 	Resources          *v1.ResourceRequirements `json:"resources,omitempty"`
 	Annotations        map[string]string        `json:"annotations,omitempty"`

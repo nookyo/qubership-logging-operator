@@ -37,6 +37,7 @@ func (r *EventsReaderReconciler) handleDeployment(cr *loggingService.LoggingServ
 			e.Spec.Template.Spec.Containers = m.Spec.Template.Spec.Containers
 			e.Spec.Template.Spec.ServiceAccountName = m.Spec.Template.Spec.ServiceAccountName
 			e.Spec.Template.Spec.NodeSelector = m.Spec.Template.Spec.NodeSelector
+			e.Spec.Template.Spec.Affinity = m.Spec.Template.Spec.Affinity
 
 			if err = r.UpdateResource(e); err != nil {
 				return err

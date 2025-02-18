@@ -56,6 +56,9 @@ func fluentbitDaemonSet(cr *loggingService.LoggingService, dynamicParameters uti
 			if cr.Spec.Fluentbit.Tolerations != nil {
 				daemonSet.Spec.Template.Spec.Tolerations = cr.Spec.Fluentbit.Tolerations
 			}
+			if cr.Spec.Fluentbit.Affinity != nil {
+				daemonSet.Spec.Template.Spec.Affinity = cr.Spec.Fluentbit.Affinity
+			}
 			if cr.Spec.Fluentbit.AdditionalVolumes != nil {
 				daemonSet.Spec.Template.Spec.Volumes = append(daemonSet.Spec.Template.Spec.Volumes, cr.Spec.Fluentbit.AdditionalVolumes...)
 			}
