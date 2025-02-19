@@ -58,6 +58,7 @@ func (r *HAFluentReconciler) handleForwarderDaemonSet(cr *loggingService.Logging
 			e.Spec.Template.Spec.NodeSelector = m.Spec.Template.Spec.NodeSelector
 			e.Spec.Template.Spec.Volumes = m.Spec.Template.Spec.Volumes
 			e.Spec.Template.Spec.Tolerations = m.Spec.Template.Spec.Tolerations
+			e.Spec.Template.Spec.Affinity = m.Spec.Template.Spec.Affinity
 			if err = r.UpdateResource(e); err != nil {
 				return err
 			}
@@ -173,6 +174,7 @@ func (r *HAFluentReconciler) handleAggregatorStatefulSet(cr *loggingService.Logg
 			e.Spec.Template.Spec.NodeSelector = ss.Spec.Template.Spec.NodeSelector
 			e.Spec.Template.Spec.Volumes = ss.Spec.Template.Spec.Volumes
 			e.Spec.Template.Spec.Tolerations = ss.Spec.Template.Spec.Tolerations
+			e.Spec.Template.Spec.Affinity = ss.Spec.Template.Spec.Affinity
 			if err = r.UpdateResource(e); err != nil {
 				return err
 			}

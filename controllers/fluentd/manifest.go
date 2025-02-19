@@ -86,6 +86,9 @@ func fluentdDaemonSet(cr *loggingService.LoggingService, dynamicParameters util.
 		if cr.Spec.Fluentd.Tolerations != nil {
 			daemonSet.Spec.Template.Spec.Tolerations = cr.Spec.Fluentd.Tolerations
 		}
+		if cr.Spec.Fluentd.Affinity != nil {
+			daemonSet.Spec.Template.Spec.Affinity = cr.Spec.Fluentd.Affinity
+		}
 		if cr.Spec.Fluentd.AdditionalVolumes != nil {
 			daemonSet.Spec.Template.Spec.Volumes = append(daemonSet.Spec.Template.Spec.Volumes, cr.Spec.Fluentd.AdditionalVolumes...)
 		}

@@ -42,6 +42,10 @@ func eventsReaderDeployment(cr *loggingService.LoggingService) (*appsv1.Deployme
 			}
 		}
 
+		if cr.Spec.CloudEventsReader.Affinity != nil {
+			deployment.Spec.Template.Spec.Affinity = cr.Spec.CloudEventsReader.Affinity
+		}
+
 		if len(strings.TrimSpace(cr.Spec.CloudEventsReader.PriorityClassName)) > 0 {
 			deployment.Spec.Template.Spec.PriorityClassName = cr.Spec.CloudEventsReader.PriorityClassName
 		}

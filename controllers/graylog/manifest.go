@@ -103,6 +103,10 @@ func graylogStatefulset(cr *loggingService.LoggingService) (*appsv1.StatefulSet,
 			}
 		}
 
+		if cr.Spec.Graylog.Affinity != nil {
+			statefulset.Spec.Template.Spec.Affinity = cr.Spec.Graylog.Affinity
+		}
+
 		if len(strings.TrimSpace(cr.Spec.Graylog.PriorityClassName)) > 0 {
 			statefulset.Spec.Template.Spec.PriorityClassName = cr.Spec.Graylog.PriorityClassName
 		}

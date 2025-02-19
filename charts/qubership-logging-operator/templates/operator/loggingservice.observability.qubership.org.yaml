@@ -25,6 +25,10 @@ spec:
   graylog:
     dockerImage: {{ template "graylog.image" . }}
     initSetupImage: {{ template "init-setup.image" . }}
+    {{- if .Values.graylog.affinity }}
+    affinity: 
+      {{- toYaml .Values.graylog.affinity | nindent 6 }}
+    {{- end }}
     mongoDBImage: {{ template "mongodb.image" . }}
     initContainerDockerImage: {{ template "graylog-plugins-init.image" . }}
     {{- if .Values.graylog.logLevel }}
@@ -427,6 +431,10 @@ spec:
     tolerations:
       {{- toYaml .Values.fluentd.tolerations | nindent 6 }}
     {{- end }}
+    {{- if .Values.fluentd.affinity }}
+    affinity: 
+      {{- toYaml .Values.fluentd.affinity | nindent 6 }}
+    {{- end }}
     {{- if .Values.fluentd.additionalVolumes }}
     additionalVolumes:
       {{- toYaml .Values.fluentd.additionalVolumes | nindent 6 }}
@@ -635,6 +643,10 @@ spec:
     tolerations:
       {{- toYaml .Values.fluentbit.tolerations | nindent 6 }}
     {{- end }}
+    {{- if .Values.fluentbit.affinity }}
+    affinity: 
+      {{- toYaml .Values.fluentbit.affinity | nindent 6 }}
+    {{- end }}
     {{- if .Values.fluentbit.additionalVolumes }}
     additionalVolumes:
       {{- toYaml .Values.fluentbit.additionalVolumes | nindent 6 }}
@@ -818,6 +830,10 @@ spec:
       tolerations:
         {{- toYaml .Values.fluentbit.aggregator.tolerations | nindent 8 }}
       {{- end }}
+      {{- if .Values.fluentbit.aggregator.affinity }}
+      affinity: 
+        {{- toYaml .Values.fluentbit.aggregator.affinity | nindent 8 }}
+      {{- end }}
       {{- if .Values.fluentbit.aggregator.startupTimeout }}
       startupTimeout: {{ .Values.fluentbit.aggregator.startupTimeout }}
       {{- end }}
@@ -929,6 +945,10 @@ spec:
     {{- if and .Values.cloudEventsReader.nodeSelectorKey .Values.cloudEventsReader.nodeSelectorValue }}
     nodeSelectorKey: {{ .Values.cloudEventsReader.nodeSelectorKey }}
     nodeSelectorValue: {{ .Values.cloudEventsReader.nodeSelectorValue }}
+    {{- end }}
+    {{- if .Values.cloudEventsReader.affinity }}
+    affinity: 
+      {{- toYaml .Values.cloudEventsReader.affinity | nindent 6 }}
     {{- end }}
     {{- if .Values.cloudEventsReader.labels }}
     labels:

@@ -40,6 +40,14 @@ ipv6: false
 #
 logLevel: info
 
+# If specified, the pod's scheduling constraints
+# More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
+# Type: object
+# Mandatory: no
+# Default: not set
+#
+affinity: {}
+
 # Map of string keys and values that can be used to organize and categorize (scope and select) objects.
 # May match selectors of replication controllers and services.
 # More info: https://kubernetes.io/docs/user-guide/labels
@@ -150,6 +158,14 @@ graylog:
   # Mandatory: yes
   #
   # dockerImage: graylog/graylog:5.2.7
+
+  # If specified, the pod's scheduling constraints
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  affinity: {}
 
   # A docker image of MongoDB to use for graylog deployment.
   # Type: string
@@ -1083,6 +1099,14 @@ fluentd:
     - operator: "Exists"
       effect: "NoSchedule"
 
+  # If specified, the pod's scheduling constraints
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  affinity: {}
+
   # The resources describe to compute resource requests and limits for single Pods.
   # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
   # Type: object
@@ -1623,6 +1647,14 @@ fluentbit:
     - operator: "Exists"
       effect: "NoSchedule"
 
+  # If specified, the pod's scheduling constraints
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  affinity: {}
+
   # The resources describe to compute resource requests and limits for single Pods.
   # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
   # Type: object
@@ -2149,6 +2181,14 @@ fluentbit:
     # Mandatory: no
     #
     tolerations: []
+    
+    # If specified, the pod's scheduling constraints
+    # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
+    # Type: object
+    # Mandatory: no
+    # Default: not set
+    #
+    affinity: {}
 
     # The amount of time the operator waits for Aggregator pod(s) to start, in minutes
     # Type: int
@@ -2552,6 +2592,14 @@ cloudEventsReader:
   # Mandatory: yes
   #
   # dockerImage: ghcr.io/netcracker/k8s-events-reader:main
+
+  # If specified, the pod's scheduling constraints
+  # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
+  # Type: object
+  # Mandatory: no
+  # Default: not set
+  #
+  affinity: {}
 
   # The resources describe to compute resource requests and limits for single Pods.
   # Ref: https://kubernetes.io/docs/user-guide/compute-resources/

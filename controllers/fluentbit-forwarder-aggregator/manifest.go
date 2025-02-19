@@ -109,6 +109,9 @@ func forwarderDaemonSet(cr *loggingService.LoggingService, dynamicParameters uti
 			if cr.Spec.Fluentbit.Tolerations != nil {
 				ds.Spec.Template.Spec.Tolerations = cr.Spec.Fluentbit.Tolerations
 			}
+			if cr.Spec.Fluentbit.Affinity != nil {
+				ds.Spec.Template.Spec.Affinity = cr.Spec.Fluentbit.Affinity
+			}
 		}
 		if err != nil {
 			return nil, err
@@ -227,6 +230,9 @@ func aggregatorStatefulSet(cr *loggingService.LoggingService) (*appsv1.StatefulS
 		}
 		if cr.Spec.Fluentbit.Aggregator.Tolerations != nil {
 			statefulSet.Spec.Template.Spec.Tolerations = cr.Spec.Fluentbit.Aggregator.Tolerations
+		}
+		if cr.Spec.Fluentbit.Aggregator.Affinity != nil {
+			statefulSet.Spec.Template.Spec.Affinity = cr.Spec.Fluentbit.Aggregator.Affinity
 		}
 	}
 	return &statefulSet, nil

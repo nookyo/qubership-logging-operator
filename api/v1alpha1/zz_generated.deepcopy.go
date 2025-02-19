@@ -151,6 +151,11 @@ func (in *CloudEventsReader) DeepCopyInto(out *CloudEventsReader) {
 		*out = new(v1.ResourceRequirements)
 		(*in).DeepCopyInto(*out)
 	}
+	if in.Affinity != nil {
+		in, out := &in.Affinity, &out.Affinity
+		*out = new(v1.Affinity)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Labels != nil {
 		in, out := &in.Labels, &out.Labels
 		*out = make(map[string]string, len(*in))
@@ -315,6 +320,11 @@ func (in *Fluentbit) DeepCopyInto(out *Fluentbit) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.Affinity != nil {
+		in, out := &in.Affinity, &out.Affinity
+		*out = new(v1.Affinity)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Output != nil {
 		in, out := &in.Output, &out.Output
 		*out = new(OutputFluentbit)
@@ -385,6 +395,11 @@ func (in *FluentbitAggregator) DeepCopyInto(out *FluentbitAggregator) {
 		for i := range *in {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
+	}
+	if in.Affinity != nil {
+		in, out := &in.Affinity, &out.Affinity
+		*out = new(v1.Affinity)
+		(*in).DeepCopyInto(*out)
 	}
 	if in.Output != nil {
 		in, out := &in.Output, &out.Output
@@ -513,6 +528,11 @@ func (in *Fluentd) DeepCopyInto(out *Fluentd) {
 			(*in)[i].DeepCopyInto(&(*out)[i])
 		}
 	}
+	if in.Affinity != nil {
+		in, out := &in.Affinity, &out.Affinity
+		*out = new(v1.Affinity)
+		(*in).DeepCopyInto(*out)
+	}
 	if in.Output != nil {
 		in, out := &in.Output, &out.Output
 		*out = new(OutputFluentd)
@@ -630,6 +650,11 @@ func (in *Graylog) DeepCopyInto(out *Graylog) {
 	if in.OpenSearch != nil {
 		in, out := &in.OpenSearch, &out.OpenSearch
 		*out = new(OpenSearch)
+		(*in).DeepCopyInto(*out)
+	}
+	if in.Affinity != nil {
+		in, out := &in.Affinity, &out.Affinity
+		*out = new(v1.Affinity)
 		(*in).DeepCopyInto(*out)
 	}
 	if in.Annotations != nil {
