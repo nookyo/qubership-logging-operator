@@ -31,7 +31,7 @@ jobs:
             context: integration-tests
           - name: qubership-logging-transfer
             file: docker-transfer/Dockerfile
-            context: docker-transfer
+            context: ""
     runs-on: ubuntu-latest
     name: ${{ matrix.component.name }}
     steps:
