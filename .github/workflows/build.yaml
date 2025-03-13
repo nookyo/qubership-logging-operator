@@ -45,6 +45,9 @@ jobs:
           - name: qubership-logging-integration-tests
             file: integration-tests/Dockerfile
             context: integration-tests
+          - name: qubership-logging-transfer
+            file: docker-transfer/Dockerfile
+            context: ""
     runs-on: ubuntu-latest
     name: ${{ matrix.component.name }}
     steps:
