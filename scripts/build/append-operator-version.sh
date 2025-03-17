@@ -9,14 +9,14 @@ COMMON_LABELS="  labels:\n    app.kubernetes.io/component: qubership-logging-ope
 
 # Add annotation with the version
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i '' -e "/^    controller-gen.kubebuilder.io.version.*/a\\    ${OPERATOR_ANNOTATION}: ${VERSION}" {} +
+    find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i '' -e "/^    controller-gen.kubebuilder.io.version.*/a\\    ${OPERATOR_ANNOTATION}: ${VERSION}" {} +
 else
-  find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i "/^    controller-gen.kubebuilder.io.version.*/a\\    ${OPERATOR_ANNOTATION}: ${VERSION}" {} +
+    find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i "/^    controller-gen.kubebuilder.io.version.*/a\\    ${OPERATOR_ANNOTATION}: ${VERSION}" {} +
 fi
 
 # Add default labels
 if [[ "$OSTYPE" == "darwin"* ]]; then
-  find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i '' -e "/^  name: ${CRD_GROUP}/i\\${COMMON_LABELS}" {} +
+    find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i '' -e "/^  name: ${CRD_GROUP}/i\\${COMMON_LABELS}" {} +
 else
-  find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i "/^  name: ${CRD_GROUP}/i\\${COMMON_LABELS}" {} +
+    find "${OPERATOR_CRD_DIR}" -name '*.yaml' -exec sed -i "/^  name: ${CRD_GROUP}/i\\${COMMON_LABELS}" {} +
 fi
