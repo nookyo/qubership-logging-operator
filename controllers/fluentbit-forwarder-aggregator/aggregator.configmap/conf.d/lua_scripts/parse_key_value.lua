@@ -28,7 +28,7 @@ function kv_parse(tag, timestamp, record)
         end
 
         -- return 2, that means the original timestamp is not modified and the record has been modified
-        -- so it must be replaced by the returned values from the record 
+        -- so it must be replaced by the returned values from the record
         return 2, timestamp, record
     else
         -- return 0, that means the record will not be modified
