@@ -78,7 +78,11 @@ func GeneratePodMonitor(s *v1.Service, sInterval string, sTimeout string) *promv
 func populateEndpointsFromServicePorts(s *v1.Service, sInterval string, sTimeout string) []promv1.PodMetricsEndpoint {
 	var endpoints []promv1.PodMetricsEndpoint
 	for _, port := range s.Spec.Ports {
-		endpoints = append(endpoints, promv1.PodMetricsEndpoint{Port: port.Name, Interval: promv1.Duration(sInterval), ScrapeTimeout: promv1.Duration(sTimeout)})
+		endpoints = append(endpoints, promv1.PodMetricsEndpoint{
+			Port:          &port.Name,
+			Interval:      promv1.Duration(sInterval),
+			ScrapeTimeout: promv1.Duration(sTimeout),
+		})
 	}
 	return endpoints
 }
