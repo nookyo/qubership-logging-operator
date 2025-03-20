@@ -9,3 +9,4 @@
 
 # Python
 venv/
+.mypy_cache/
