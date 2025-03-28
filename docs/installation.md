@@ -622,7 +622,7 @@ Examples:
 ```yaml
 name: logging-service
 namespace: logging
-operatorImage: qubership-logging-operator:main
+operatorImage: ghcr.io/netcracker/qubership-logging-operator:main
 
 cloudURL: https://kubernetes.default.svc
 osKind: ubuntu
@@ -2170,7 +2170,7 @@ Examples:
 ```yaml
 cloudEventsReader:
   install: true
-  dockerImage: k8s-events-reader:main
+  dockerImage: ghcr.io/netcracker/qubership-kube-events-reader:main
   resources:
     requests:
       cpu:

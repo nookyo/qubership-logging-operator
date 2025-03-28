@@ -291,7 +291,7 @@ Image can be found from:
   {{- if .Values.fluentd.configmapReload.dockerImage -}}
     {{- printf "%s" .Values.fluentd.configmapReload.dockerImage -}}
   {{- else -}}
-    {{- print "jimmidyson/configmap-reload:v0.13.1" -}}
+    {{- print "ghcr.io/jimmidyson/configmap-reload:v0.13.1" -}}
   {{- end -}}
 {{- end -}}
 
@@ -319,7 +319,7 @@ Image can be found from:
   {{- if .Values.fluentbit.configmapReload.dockerImage -}}
     {{- printf "%s" .Values.fluentbit.configmapReload.dockerImage -}}
   {{- else -}}
-    {{- print "jimmidyson/configmap-reload:v0.13.1" -}}
+    {{- print "ghcr.io/jimmidyson/configmap-reload:v0.13.1" -}}
   {{- end -}}
 {{- end -}}
 
@@ -333,7 +333,7 @@ Image can be found from:
   {{- if .Values.cloudEventsReader.dockerImage -}}
     {{- printf "%s" .Values.cloudEventsReader.dockerImage -}}
   {{- else -}}
-    {{- print "k8s-events-reader:main" -}}
+    {{- print "ghcr.io/netcracker/qubership-kube-events-reader:main" -}}
   {{- end -}}
 {{- end -}}
 

@@ -120,7 +120,7 @@ pprof:
     labels: {}
 
 # Image of qubership-logging-operator
-# operatorImage: qubership-logging-operator:main
+# operatorImage: ghcr.io/netcracker/qubership-logging-operator:main
 
 # skipMetricsService: false
 
@@ -1073,7 +1073,7 @@ fluentd:
 
   configmapReload:
     #
-    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
     #
     # The resources describe to compute resource requests and limits for single Pods.
     # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
@@ -1621,7 +1621,7 @@ fluentbit:
 
   configmapReload:
     #
-    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
     #
     # The resources describe to compute resource requests and limits for single Pods.
     # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
@@ -2154,7 +2154,7 @@ fluentbit:
     # Type: string
     # Mandatory: yes
     #
-    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
     #
     # The resources describe to compute resource requests and limits for single Pods.
     # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
@@ -2181,7 +2181,7 @@ fluentbit:
     # Mandatory: no
     #
     tolerations: []
-    
+
     # If specified, the pod's scheduling constraints
     # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
     # Type: object
@@ -2591,7 +2591,7 @@ cloudEventsReader:
   # Type: string
   # Mandatory: yes
   #
-  # dockerImage: ghcr.io/netcracker/k8s-events-reader:main
+  # dockerImage: ghcr.io/netcracker/qubership-kube-events-reader:main
 
   # If specified, the pod's scheduling constraints
   # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
