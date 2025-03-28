@@ -375,26 +375,26 @@ graylog:
   # Default: ""
   #
   contentPack: []
-    # - http:
-    #   credentials:
-    #     username:
-    #       key: user
-    #       name: secret-name
-    #     password:
-    #       key: password
-    #       name: secret-name
-    #   tlsConfig:
-    #     insecureSkipVerify: false
-    #     ca:
-    #       key: cert-ca.pem
-    #       name: secret-certificate-authority
-    #     cert:
-    #       key: cert.crt
-    #       name: secret-certificate
-    #     pkey:
-    #       key: cert.key
-    #       name: secret-certificate
-    #   url: graylog content pack path
+  # - http:
+  #   credentials:
+  #     username:
+  #       key: user
+  #       name: secret-name
+  #     password:
+  #       key: password
+  #       name: secret-name
+  #   tlsConfig:
+  #     insecureSkipVerify: false
+  #     ca:
+  #       key: cert-ca.pem
+  #       name: secret-certificate-authority
+  #     cert:
+  #       key: cert.crt
+  #       name: secret-certificate
+  #     pkey:
+  #       key: cert.key
+  #       name: secret-certificate
+  #   url: graylog content pack path
 
   # Graylog plugin path.
   # Type: string
@@ -1093,12 +1093,12 @@ fluentd:
   # Mandatory: no
   #
   tolerations:
-    - key: node-role.kubernetes.io/master
-      operator: Exists
-    - operator: "Exists"
-      effect: "NoExecute"
-    - operator: "Exists"
-      effect: "NoSchedule"
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+  - operator: "Exists"
+    effect: "NoExecute"
+  - operator: "Exists"
+    effect: "NoSchedule"
 
   # If specified, the pod's scheduling constraints
   # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
@@ -1585,6 +1585,10 @@ fluentd:
     name: logging-fluentd
     install: false
 
+  # PriorityClassName assigned to the Pods to prevent them from evicting.
+  # Type: string
+  # priorityClassName: "priorityClassName"
+
   ## Pod monitor for FluentD
   ## Type: object
   ## Mandatory: no
@@ -1600,10 +1604,6 @@ fluentd:
     # Mandatory: no
     #
     scrapeInterval: 30s
-
-  # PriorityClassName assigned to the Pods to prevent them from evicting.
-  # Type: string
-  # priorityClassName: "priorityClassName"
 
 ##  Mandatory values for FluentBit.
 #
@@ -2151,16 +2151,16 @@ fluentbit:
     # dockerImage: fluent/fluent-bit:3.0.6
 
     configmapReload:
-    # A docker image to use for FluentBit aggregator configmap reload sidecar.
-    # Type: string
-    # Mandatory: yes
-    #
-    # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
-    #
-    # The resources describe to compute resource requests and limits for single Pods.
-    # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
-    # Type: object
-    #
+      # A docker image to use for FluentBit aggregator configmap reload sidecar.
+      # Type: string
+      # Mandatory: yes
+      #
+      # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
+
+      # The resources describe to compute resource requests and limits for single Pods.
+      # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+      # Type: object
+      #
       resources:
         limits:
           cpu: 50m
@@ -2289,17 +2289,17 @@ fluentbit:
       # Mandatory: no
       #
       # ca:
-        # Name of Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-ca
+      #   Name of Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-ca
 
-        # Key (filename) in the Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: ca.crt
+      #   Key (filename) in the Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: ca.crt
 
       # Configuration for a client certificate.
       # If present, both secretKey and secretName fields are required.
@@ -2569,15 +2569,15 @@ fluentbit:
     #
     multilineOtherLinesRegexp: ~
 
+    # PriorityClassName assigned to the Pods to prevent them from evicting.
+    # Type: string
+    # priorityClassName: "priorityClassName"
+
     ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
     #
     securityResources:
       name: logging-fluentbit-aggregator
       install: false
-
-    # PriorityClassName assigned to the Pods to prevent them from evicting.
-    # Type: string
-    # priorityClassName: "priorityClassName"
 
 ##  Mandatory values for Cloud Events Reader.
 #
@@ -2602,18 +2602,6 @@ cloudEventsReader:
   #
   affinity: {}
 
-  # The resources describe to compute resource requests and limits for single Pods.
-  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
-  # Type: object
-  #
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 100m
-      memory: 128Mi
-
   # Allow defines which Nodes the Pods are scheduled on.
   # nodeSelectorKey - key name
   # nodeSelectorValue - value
@@ -2636,6 +2624,18 @@ cloudEventsReader:
   #   - "-namespace=logging"
   #   - "-namespace=monitoring"
   #   - "-format={\"time\":\"{{.LastTimestamp.Format \"2006-01-02T15:04:05Z\"}}\""
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 ##  Mandatory values for Integration Tests.
 #
