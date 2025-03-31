@@ -120,7 +120,7 @@ pprof:
     labels: {}
 
 # Image of qubership-logging-operator
-# operatorImage: qubership-logging-operator:main
+# operatorImage: ghcr.io/netcracker/qubership-logging-operator:main
 
 # skipMetricsService: false
 
@@ -256,7 +256,7 @@ graylog:
   # Type: string
   # Default: ""
   #
-  mongoPersistentVolume:
+  mongoPersistentVolume: ""
 
   # Mongo PVC storage class name.
   # Type: string
@@ -268,7 +268,7 @@ graylog:
   # Type: string
   # Default: ""
   #
-  graylogPersistentVolume:
+  graylogPersistentVolume: ""
 
   # Graylog PVC storage class name.
   # Type: string
@@ -349,8 +349,8 @@ graylog:
   # Default: not set
   #
   # Example:
-    # nodeSelectorKey: role
-    # nodeSelectorValue: compute
+  # nodeSelectorKey: role
+  # nodeSelectorValue: compute
 
   ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
   #
@@ -368,33 +368,33 @@ graylog:
   # Type: string
   # Default: ""
   #
-  contentPackPaths:
+  contentPackPaths: ""
 
   # Graylog content packs.
   # Type: object
   # Default: ""
   #
   contentPack: []
-    # - http:
-      # credentials:
-      #   username:
-      #     key: user
-      #     name: secret-name
-      #   password:
-      #     key: password
-      #     name: secret-name
-      # tlsConfig:
-      #   insecureSkipVerify: false
-      #   ca:
-      #     key: cert-ca.pem
-      #     name: secret-certificate-authority
-      #   cert:
-      #     key: cert.crt
-      #     name: secret-certificate
-      #   pkey:
-      #     key: cert.key
-      #     name: secret-certificate
-      # url: graylog content pack path
+  # - http:
+  #   credentials:
+  #     username:
+  #       key: user
+  #       name: secret-name
+  #     password:
+  #       key: password
+  #       name: secret-name
+  #   tlsConfig:
+  #     insecureSkipVerify: false
+  #     ca:
+  #       key: cert-ca.pem
+  #       name: secret-certificate-authority
+  #     cert:
+  #       key: cert.crt
+  #       name: secret-certificate
+  #     pkey:
+  #       key: cert.key
+  #       name: secret-certificate
+  #   url: graylog content pack path
 
   # Graylog plugin path.
   # Type: string
@@ -440,7 +440,8 @@ graylog:
   # Type: array
   # Mandatory: no
   #
-  streams:
+  streams: []
+
   # The title of a stream in Graylog.
   # Available logs are "System logs", "Audit logs", "Kubernetes events", "Access logs", "Integration logs" and "Bill Cycle logs".
   # Type: string
@@ -565,17 +566,17 @@ graylog:
       # Mandatory: no
       #
       # cert:
-        # Name of Secret with the certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-cert
+      #   Name of Secret with the certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-cert
 
-        # Key (filename) in the Secret with the certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: certificate.crt
+      #   Key (filename) in the Secret with the certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: certificate.crt
 
       # The PKCS#8 private key file in PEM format to use for securing the HTTP interface.
       # If present, both secretKey and secretName fields are required.
@@ -583,17 +584,17 @@ graylog:
       # Mandatory: no
       #
       # key:
-        # Name of Secret with the private key for the certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-key
+      #   Name of Secret with the private key for the certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-key
 
-        # Key (filename) in the Secret with the private key for the certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: privateKey.key
+      #   Key (filename) in the Secret with the private key for the certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: privateKey.key
 
       # The password to unlock the private key used for securing the HTTP interface.
       # Type: string
@@ -795,17 +796,17 @@ graylog:
       # Mandatory: no
       #
       # ca:
-        # Name of Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-ca
+      #   Name of Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-ca
 
-        # Key (filename) in the Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: ca.crt
+      #   Key (filename) in the Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: ca.crt
 
       # Configuration for a client certificate.
       # If present, both secretKey and secretName fields are required.
@@ -813,17 +814,17 @@ graylog:
       # Mandatory: no
       #
       # cert:
-        # Name of Secret with client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-cert
+      #   Name of Secret with client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-cert
 
-        # Key (filename) in the Secret with client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: certificate.crt
+      #   Key (filename) in the Secret with client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      # secretKey: certificate.crt
 
       # Configuration for a key for the certificate file.
       # If present, both secretKey and secretName fields are required.
@@ -831,17 +832,17 @@ graylog:
       # Mandatory: no
       #
       # key:
-        # Name of Secret with key for the client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-key
+      #   Name of Secret with key for the client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-key
 
-        # Key (filename) in the Secret with key for the client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: privateKey.key
+      #   Key (filename) in the Secret with key for the client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: privateKey.key
 
       # Sets ldap.OPT_REFERRALS to zero.
       # Type: bool
@@ -971,17 +972,17 @@ graylog:
       # Mandatory: no
       #
       # ca:
-        # Name of Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-ca
+      #   Name of Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-ca
 
-        # Key (filename) in the Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: ca.crt
+      #   Key (filename) in the Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: ca.crt
 
       # Configuration for a client certificate.
       # If present, both secretKey and secretName fields are required.
@@ -989,17 +990,17 @@ graylog:
       # Mandatory: no
       #
       # cert:
-        # Name of Secret with client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-cert
+      #   Name of Secret with client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-cert
 
-        # Key (filename) in the Secret with client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: certificate.crt
+      #   Key (filename) in the Secret with client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: certificate.crt
 
       # Configuration for a key for the certificate file.
       # If present, both secretKey and secretName fields are required.
@@ -1007,17 +1008,17 @@ graylog:
       # Mandatory: no
       #
       # key:
-        # Name of Secret with key for the client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-key
+      #   Name of Secret with key for the client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-key
 
-        # Key (filename) in the Secret with key for the client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: privateKey.key
+      #   Key (filename) in the Secret with key for the client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: privateKey.key
 
       # Allows to define a Kubernetes Secret for OAuth client secret.
       # Type: object
@@ -1073,7 +1074,7 @@ fluentd:
 
   configmapReload:
     #
-    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
     #
     # The resources describe to compute resource requests and limits for single Pods.
     # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
@@ -1092,12 +1093,12 @@ fluentd:
   # Mandatory: no
   #
   tolerations:
-    - key: node-role.kubernetes.io/master
-      operator: Exists
-    - operator: "Exists"
-      effect: "NoExecute"
-    - operator: "Exists"
-      effect: "NoSchedule"
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+  - operator: "Exists"
+    effect: "NoExecute"
+  - operator: "Exists"
+    effect: "NoSchedule"
 
   # If specified, the pod's scheduling constraints
   # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
@@ -1222,17 +1223,17 @@ fluentd:
     # Mandatory: no
     #
     # ca:
-      # Name of Secret with CA certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretName: secret-ca
+    #   Name of Secret with CA certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretName: secret-ca
 
-      # Key (filename) in the Secret with CA certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretKey: ca.crt
+    #   Key (filename) in the Secret with CA certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretKey: ca.crt
 
     # Configuration for a client certificate.
     # If present, both secretKey and secretName fields are required.
@@ -1240,17 +1241,17 @@ fluentd:
     # Mandatory: no
     #
     # cert:
-      # Name of Secret with client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretName: secret-cert
+    #   Name of Secret with client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretName: secret-cert
 
-      # Key (filename) in the Secret with client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretKey: certificate.crt
+    #   Key (filename) in the Secret with client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretKey: certificate.crt
 
     # Configuration for a key for the certificate file.
     # If present, both secretKey and secretName fields are required.
@@ -1258,17 +1259,17 @@ fluentd:
     # Mandatory: no
     #
     # key:
-      # Name of Secret with key for the client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretName: secret-key
+    #   Name of Secret with key for the client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretName: secret-key
 
-      # Key (filename) in the Secret with key for the client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretKey: privateKey.key
+    #   Key (filename) in the Secret with key for the client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretKey: privateKey.key
 
     # Allows any ciphers to be used, may be insecure.
     # Type: bool
@@ -1309,7 +1310,7 @@ fluentd:
   # Type: int
   # Mandatory: no
   #
-  queueLimitLength:
+  # queueLimitLength:
 
   # The size limitation of output buffer
   # Type: string
@@ -1332,19 +1333,19 @@ fluentd:
   # Type: string
   # Mandatory: no
   #
-  customFilterConf:
+  customFilterConf: ""
 
   # FluentD custom output configuration.
   # Type: string
   # Mandatory: no
   #
-  customOutputConf:
+  customOutputConf: ""
 
   # FluentD custom input configuration.
   # Type: string
   # Mandatory: no
   #
-  customInputConf:
+  customInputConf: ""
 
   # FluentD filter for parsing bill-cycle-logs
   # Type: bool
@@ -1357,7 +1358,7 @@ fluentd:
   # Mandatory: no
   # Default: /(^\[\d{4}\-\d{2}\-\d{2})|(^\{\")|(^*0m\d{2}\:\d{2}\:\d{2})/
   #
-  multilineFirstLineRegexp:
+  # multilineFirstLineRegexp:
 
   # Enable input for system logs from /var/log/messages, /var/log/syslog or /var/log/journal.
   # Type of system logs can be chosen by systemLogType parameter.
@@ -1457,10 +1458,10 @@ fluentd:
 
       # Static labels that added as stream labels.
       # Type: string
-      # Default: {"job":"fluentd"}
+      # Default: { "job": "fluentd" }
       # Mandatory: no
       #
-      staticLabels: {"job":"fluentd"}
+      staticLabels: { "job": "fluentd" }
 
       # Labels mappings that defines how to extract labels from each log record
       # Type: string
@@ -1498,17 +1499,17 @@ fluentd:
         # Mandatory: no
         #
         # ca:
-          # Name of Secret with CA certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretName: secret-ca
+        #   Name of Secret with CA certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretName: secret-ca
 
-          # Key (filename) in the Secret with CA certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretKey: ca.crt
+        #   Key (filename) in the Secret with CA certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretKey: ca.crt
 
         # Configuration for a client certificate.
         # If present, both secretKey and secretName fields are required.
@@ -1516,17 +1517,17 @@ fluentd:
         # Mandatory: no
         #
         # cert:
-          # Name of Secret with client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretName: secret-cert
+        #   Name of Secret with client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretName: secret-cert
 
-          # Key (filename) in the Secret with client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretKey: certificate.crt
+        #   Key (filename) in the Secret with client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretKey: certificate.crt
 
         # Configuration for a key for the certificate file.
         # If present, both secretKey and secretName fields are required.
@@ -1534,17 +1535,17 @@ fluentd:
         # Mandatory: no
         #
         # key:
-          # Name of Secret with key for the client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretName: secret-key
+        #   Name of Secret with key for the client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretName: secret-key
 
-          # Key (filename) in the Secret with key for the client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretKey: privateKey.key
+        #   Key (filename) in the Secret with key for the client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretKey: privateKey.key
 
         # Allows any ciphers to be used, may be insecure.
         # Type: bool
@@ -1567,22 +1568,26 @@ fluentd:
         #
         noVerify: false
 
-      # Additional configuration parameters for Loki output.
-      # Buffer can be configured here and other available parameters of FluentD Loki output plugin.
-      # See all the parameters here: https://github.com/grafana/loki/blob/main/clients/cmd/fluentd/lib/fluent/plugin/out_loki.rb
-      # Type: string
-      # Mandatory: no
-      #
-      # extraParams: |
-      #   extract_kubernetes_labels false
-      #   remove_keys []
-      #   custom_headers header:value
+        # Additional configuration parameters for Loki output.
+        # Buffer can be configured here and other available parameters of FluentD Loki output plugin.
+        # See all the parameters here: https://github.com/grafana/loki/blob/main/clients/cmd/fluentd/lib/fluent/plugin/out_loki.rb
+        # Type: string
+        # Mandatory: no
+        #
+        # extraParams: |
+        #   extract_kubernetes_labels false
+        #   remove_keys []
+        #   custom_headers header:value
 
   ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
   #
   securityResources:
     name: logging-fluentd
     install: false
+
+  # PriorityClassName assigned to the Pods to prevent them from evicting.
+  # Type: string
+  # priorityClassName: "priorityClassName"
 
   ## Pod monitor for FluentD
   ## Type: object
@@ -1599,10 +1604,6 @@ fluentd:
     # Mandatory: no
     #
     scrapeInterval: 30s
-
-  # PriorityClassName assigned to the Pods to prevent them from evicting.
-  # Type: string
-  # priorityClassName: "priorityClassName"
 
 ##  Mandatory values for FluentBit.
 #
@@ -1621,7 +1622,7 @@ fluentbit:
 
   configmapReload:
     #
-    # dockerImage: jimmidyson/configmap-reload:v0.13.1
+    # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
     #
     # The resources describe to compute resource requests and limits for single Pods.
     # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
@@ -1640,12 +1641,12 @@ fluentbit:
   # Mandatory: no
   #
   tolerations:
-    - key: node-role.kubernetes.io/master
-      operator: Exists
-    - operator: "Exists"
-      effect: "NoExecute"
-    - operator: "Exists"
-      effect: "NoSchedule"
+  - key: node-role.kubernetes.io/master
+    operator: Exists
+  - operator: "Exists"
+    effect: "NoExecute"
+  - operator: "Exists"
+    effect: "NoSchedule"
 
   # If specified, the pod's scheduling constraints
   # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
@@ -1788,17 +1789,17 @@ fluentbit:
         # Mandatory: no
         #
         # ca:
-          # Name of Secret with CA certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretName: secret-ca
+        #   Name of Secret with CA certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretName: secret-ca
 
-          # Key (filename) in the Secret with CA certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretKey: ca.crt
+        #   Key (filename) in the Secret with CA certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretKey: ca.crt
 
         # Configuration for a client certificate.
         # If present, both secretKey and secretName fields are required.
@@ -1806,17 +1807,17 @@ fluentbit:
         # Mandatory: no
         #
         # cert:
-          # Name of Secret with client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretName: secret-cert
+        #   Name of Secret with client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretName: secret-cert
 
-          # Key (filename) in the Secret with client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretKey: certificate.crt
+        #   Key (filename) in the Secret with client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretKey: certificate.crt
 
         # Configuration for a key for the certificate file.
         # If present, both secretKey and secretName fields are required.
@@ -1824,17 +1825,17 @@ fluentbit:
         # Mandatory: no
         #
         # key:
-          # Name of Secret with key for the client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretName: secret-key
+        #   Name of Secret with key for the client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretName: secret-key
 
-          # Key (filename) in the Secret with key for the client certificate.
-          # Type: string
-          # Mandatory: yes
-          #
-          # secretKey: privateKey.key
+        #   Key (filename) in the Secret with key for the client certificate.
+        #   Type: string
+        #   Mandatory: yes
+        #
+        #   secretKey: privateKey.key
 
         # Force certificate validation.
         # Type: bool
@@ -1911,17 +1912,17 @@ fluentbit:
     # Mandatory: no
     #
     # ca:
-      # Name of Secret with CA certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretName: secret-ca
+    #   Name of Secret with CA certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretName: secret-ca
 
-      # Key (filename) in the Secret with CA certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretKey: ca.crt
+    #   Key (filename) in the Secret with CA certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretKey: ca.crt
 
     # Configuration for a client certificate.
     # If present, both secretKey and secretName fields are required.
@@ -1929,17 +1930,17 @@ fluentbit:
     # Mandatory: no
     #
     # cert:
-      # Name of Secret with client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretName: secret-cert
+    #   Name of Secret with client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretName: secret-cert
 
-      # Key (filename) in the Secret with client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretKey: certificate.crt
+    #   Key (filename) in the Secret with client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretKey: certificate.crt
 
     # Configuration for a key for the certificate file.
     # If present, both secretKey and secretName fields are required.
@@ -1947,17 +1948,17 @@ fluentbit:
     # Mandatory: no
     #
     # key:
-      # Name of Secret with key for the client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretName: secret-key
+    #   Name of Secret with key for the client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretName: secret-key
 
-      # Key (filename) in the Secret with key for the client certificate.
-      # Type: string
-      # Mandatory: yes
-      #
-      # secretKey: privateKey.key
+    #   Key (filename) in the Secret with key for the client certificate.
+    #   Type: string
+    #   Mandatory: yes
+    #
+    #   secretKey: privateKey.key
 
     # Force certificate validation.
     # Type: bool
@@ -2007,7 +2008,7 @@ fluentbit:
   #          Name record_modifier
   #          Match *
   #          Record testField fluent-bit
-  customFilterConf:
+  # customFilterConf:
 
   # FluentBit custom output configuration.
   # Type: string
@@ -2018,7 +2019,7 @@ fluentbit:
   #      [OUTPUT]
   #          Name null
   #          Match fluent.*
-  customOutputConf:
+  # customOutputConf:
 
   # FluentBit custom input configuration.
   # Type: string
@@ -2150,16 +2151,16 @@ fluentbit:
     # dockerImage: fluent/fluent-bit:3.0.6
 
     configmapReload:
-    # A docker image to use for FluentBit aggregator configmap reload sidecar.
-    # Type: string
-    # Mandatory: yes
-    #
-    # dockerImage: jimmidyson/configmap-reload:v0.13.1
-    #
-    # The resources describe to compute resource requests and limits for single Pods.
-    # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
-    # Type: object
-    #
+      # A docker image to use for FluentBit aggregator configmap reload sidecar.
+      # Type: string
+      # Mandatory: yes
+      #
+      # dockerImage: ghcr.io/jimmidyson/configmap-reload:v0.13.1
+
+      # The resources describe to compute resource requests and limits for single Pods.
+      # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+      # Type: object
+      #
       resources:
         limits:
           cpu: 50m
@@ -2181,7 +2182,7 @@ fluentbit:
     # Mandatory: no
     #
     tolerations: []
-    
+
     # If specified, the pod's scheduling constraints
     # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
     # Type: object
@@ -2288,17 +2289,17 @@ fluentbit:
       # Mandatory: no
       #
       # ca:
-        # Name of Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-ca
+      #   Name of Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-ca
 
-        # Key (filename) in the Secret with CA certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: ca.crt
+      #   Key (filename) in the Secret with CA certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: ca.crt
 
       # Configuration for a client certificate.
       # If present, both secretKey and secretName fields are required.
@@ -2306,17 +2307,17 @@ fluentbit:
       # Mandatory: no
       #
       # cert:
-        # Name of Secret with client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-cert
+      #   Name of Secret with client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-cert
 
-        # Key (filename) in the Secret with client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: certificate.crt
+      #   Key (filename) in the Secret with client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: certificate.crt
 
       # Configuration for a key for the certificate file.
       # If present, both secretKey and secretName fields are required.
@@ -2324,17 +2325,17 @@ fluentbit:
       # Mandatory: no
       #
       # key:
-        # Name of Secret with key for the client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretName: secret-key
+      #   Name of Secret with key for the client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretName: secret-key
 
-        # Key (filename) in the Secret with key for the client certificate.
-        # Type: string
-        # Mandatory: yes
-        #
-        # secretKey: privateKey.key
+      #   Key (filename) in the Secret with key for the client certificate.
+      #   Type: string
+      #   Mandatory: yes
+      #
+      #   secretKey: privateKey.key
 
       # Force certificate validation.
       # Type: bool
@@ -2425,17 +2426,17 @@ fluentbit:
           # Mandatory: no
           #
           # ca:
-            # Name of Secret with CA certificate.
-            # Type: string
-            # Mandatory: yes
-            #
-            # secretName: secret-ca
+          #   Name of Secret with CA certificate.
+          #   Type: string
+          #   Mandatory: yes
+          #
+          #   secretName: secret-ca
 
-            # Key (filename) in the Secret with CA certificate.
-            # Type: string
-            # Mandatory: yes
-            #
-            # secretKey: ca.crt
+          #   Key (filename) in the Secret with CA certificate.
+          #   Type: string
+          #   Mandatory: yes
+          #
+          #   secretKey: ca.crt
 
           # Configuration for a client certificate.
           # If present, both secretKey and secretName fields are required.
@@ -2443,17 +2444,17 @@ fluentbit:
           # Mandatory: no
           #
           # cert:
-            # Name of Secret with client certificate.
-            # Type: string
-            # Mandatory: yes
-            #
-            # secretName: secret-cert
+          #   Name of Secret with client certificate.
+          #   Type: string
+          #   Mandatory: yes
+          #
+          #   secretName: secret-cert
 
-            # Key (filename) in the Secret with client certificate.
-            # Type: string
-            # Mandatory: yes
-            #
-            # secretKey: certificate.crt
+          #   Key (filename) in the Secret with client certificate.
+          #   Type: string
+          #   Mandatory: yes
+          #
+          #   secretKey: certificate.crt
 
           # Configuration for a key for the certificate file.
           # If present, both secretKey and secretName fields are required.
@@ -2461,17 +2462,17 @@ fluentbit:
           # Mandatory: no
           #
           # key:
-            # Name of Secret with key for the client certificate.
-            # Type: string
-            # Mandatory: yes
-            #
-            # secretName: secret-key
+          #   Name of Secret with key for the client certificate.
+          #   Type: string
+          #   Mandatory: yes
+          #
+          #   secretName: secret-key
 
-            # Key (filename) in the Secret with key for the client certificate.
-            # Type: string
-            # Mandatory: yes
-            #
-            # secretKey: privateKey.key
+          #   Key (filename) in the Secret with key for the client certificate.
+          #   Type: string
+          #   Mandatory: yes
+          #
+          #   secretKey: privateKey.key
 
           # Force certificate validation.
           # Type: bool
@@ -2568,15 +2569,15 @@ fluentbit:
     #
     multilineOtherLinesRegexp: ~
 
+    # PriorityClassName assigned to the Pods to prevent them from evicting.
+    # Type: string
+    # priorityClassName: "priorityClassName"
+
     ## Allow creating security resources as PodSecurityPolicy, SecurityContextConstraints
     #
     securityResources:
       name: logging-fluentbit-aggregator
       install: false
-
-    # PriorityClassName assigned to the Pods to prevent them from evicting.
-    # Type: string
-    # priorityClassName: "priorityClassName"
 
 ##  Mandatory values for Cloud Events Reader.
 #
@@ -2591,7 +2592,7 @@ cloudEventsReader:
   # Type: string
   # Mandatory: yes
   #
-  # dockerImage: ghcr.io/netcracker/k8s-events-reader:main
+  # dockerImage: ghcr.io/netcracker/qubership-kube-events-reader:main
 
   # If specified, the pod's scheduling constraints
   # More info: https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.23/#affinity-v1-core
@@ -2600,18 +2601,6 @@ cloudEventsReader:
   # Default: not set
   #
   affinity: {}
-
-  # The resources describe to compute resource requests and limits for single Pods.
-  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
-  # Type: object
-  #
-  resources:
-    requests:
-      cpu: 100m
-      memory: 128Mi
-    limits:
-      cpu: 100m
-      memory: 128Mi
 
   # Allow defines which Nodes the Pods are scheduled on.
   # nodeSelectorKey - key name
@@ -2635,6 +2624,18 @@ cloudEventsReader:
   #   - "-namespace=logging"
   #   - "-namespace=monitoring"
   #   - "-format={\"time\":\"{{.LastTimestamp.Format \"2006-01-02T15:04:05Z\"}}\""
+
+  # The resources describe to compute resource requests and limits for single Pods.
+  # Ref: https://kubernetes.io/docs/user-guide/compute-resources/
+  # Type: object
+  #
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 100m
+      memory: 128Mi
 
 ##  Mandatory values for Integration Tests.
 #
@@ -2721,10 +2722,4 @@ integrationTests:
 
   # The parameter specifies the ssh key for login to VM.
   # Type: string
-  # Example:
-  # sshKey: |
-  #  -----BEGIN RSA PRIVATE KEY-----
-  #  MII.................................g==
-  #  -----END RSA PRIVATE KEY-----
-  #
   sshKey: ""
