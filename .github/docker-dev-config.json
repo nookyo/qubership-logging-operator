@@ -1,7 +1,7 @@
 {
     "components" : [
       {
-          "name": "logging-operator",
+          "name": "qubership-logging-operator",
           "file": "./Dockerfile",
           "context": "."
       },
