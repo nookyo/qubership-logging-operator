@@ -1,0 +1,65 @@
+name: Dev Build
+run-name: "Dev build repository: ${{ github.ref_name }} #${{ github.run_number }}"
+on:
+  workflow_dispatch:
+    inputs:
+      artifact-name:
+        description: 'Artifact name'
+        required: false
+        default: ''
+      tags:
+        required: false
+        type: string
+        default: ''
+        description: 'Tags'
+      java-version:
+        required: false
+        type: string
+        default: "21"
+        description: 'Java version (e.g., 21)'
+      dry-run:
+        required: false
+        type: boolean
+        default: false
+        description: 'Dry run'
+
+jobs:
+  perform-version:
+    runs-on: ubuntu-latest
+    outputs:
+       metadata: "${{ steps.metadata.outputs.result }}"
+       tags: "${{ steps.prepare_tags.outputs.tags }}"
+    steps:
+      - name : Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create name
+        uses: netcracker/qubership-workflow-hub/actions/metadata-action@main
+        id: metadata
+        with:
+          configuration-path: .github/metadata-config.yml
+
+      - name: Echo metadata
+        run: 'echo Metadata result: ${{ steps.metadata.outputs.result }} >> $GITHUB_STEP_SUMMARY'
+
+      - name: Prepare tags
+        id: prepare_tags
+        run: |
+          BASE_TAG="${{ steps.metadata.outputs.result }}"
+          EXTRA_TAG="${{ github.event.inputs.tags }}"
+          if [ -n "$EXTRA_TAG" ]; then
+            TAGS="${BASE_TAG}, ${EXTRA_TAG}"
+          else
+            TAGS="${BASE_TAG}"
+          fi
+          echo "tags=${TAGS}" >> $GITHUB_OUTPUT
+          echo "tags: ${TAGS}" >> $GITHUB_STEP_SUMMARY
+
+  docker-build:
+       uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
+       needs: perform-version
+       with:
+         ref: ${{ github.event.ref }}
+         artifact-id: ${{ github.event.inputs.artifact-name || github.event.repository.name }}
+         dry-run: ${{ inputs.dry-run }}
+         tags: ${{ needs.perform-version.outputs.tags }}

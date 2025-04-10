@@ -1,0 +1,15 @@
+{
+    "components" : [
+      {
+          "name": "logging-operator",
+          "file": "./Dockerfile",
+          "context": "."
+      },
+      {
+          "name": "qubership-logging-integration-tests",
+          "file": "integration-tests/Dockerfile ",
+          "context": "integration-tests"
+      }
+  ],
+  "platforms" : "linux/amd64,linux/arm64"
+  }
