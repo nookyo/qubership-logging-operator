@@ -27,7 +27,7 @@ jobs:
     - name: Load Docker Configuration
       id: load_component
       run:  |
-        verify=$(cat "$GITHUB_WORKSPACE/.github/docker-build-config.json" | jq '
+        verify=$(cat "$GITHUB_WORKSPACE/.github/docker-dev-config.json" | jq '
         def verify_structure:
         .components as $components
         | .platforms as $platforms

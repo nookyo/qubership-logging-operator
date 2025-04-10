@@ -1,5 +1,5 @@
 branches-template:
-  - main: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{sha}}, {{.sha}"
+  - main: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{sha}}, {{sha}"
   - tag: "v{{major}}.{{minor}}.{{patch}}"
 dist-tags:
   - main: "main"
