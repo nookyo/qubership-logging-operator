@@ -63,6 +63,7 @@ jobs:
         id: metadata
         with:
           configuration-path: .github/metadata-config.yml
+          short-sha-deep: 10
 
       - name: Echo metadata
         run: 'echo Metadata result: ${{ steps.metadata.outputs.result }} >> $GITHUB_STEP_SUMMARY'
