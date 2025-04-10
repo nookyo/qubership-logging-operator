@@ -1,5 +1,5 @@
 branches-template:
-  - main: "{{ref-name}}-{{timestamp}}-{{runNumber}}"
+  - main: "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{github.sha}}, {{github.sha}"
   - "feature/*": "{{ref-name}}-{{timestamp}}, {{ref-name}}-{{github.sha}}, {{github.sha}"
   - "dev": "{{ref-name}}-{{timestamp}}-{{runNumber}}"
   - "fix/*": "{{ref-name}}-{{timestamp}}-{{runNumber}}"
