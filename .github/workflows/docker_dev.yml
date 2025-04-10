@@ -15,6 +15,40 @@ on:
         description: 'Dry run'
 
 jobs:
+  load-docker-build-components:
+    runs-on: ubuntu-latest
+    outputs:
+      component: ${{ steps.load_component.outputs.components }}
+      platforms: ${{ steps.load_component.outputs.platforms }}
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Load Docker Configuration
+      id: load_component
+      run:  |
+        verify=$(cat "$GITHUB_WORKSPACE/.github/docker-build-config.json" | jq '
+        def verify_structure:
+        .components as $components
+        | .platforms as $platforms
+        | ($components | type == "array")
+        and (all($components[]; has("name") and has("file") and has("context")))
+        and ($platforms | type == "string");
+        verify_structure
+        | if . then true else false end
+        ')
+        if [ ${verify} == 'true' ]; then
+          echo "✅ $GITHUB_WORKSPACE/.github/docker-build-config.json file is valid"
+          components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/docker-build-config.json")
+          platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/docker-build-config.json")
+        else
+          echo "❗ $GITHUB_WORKSPACE/.github/docker-build-config.json file is invalid"
+          echo "❗ $GITHUB_WORKSPACE/.github/docker-build-config.json file is invalid" >> $GITHUB_STEP_SUMMARY
+          exit 1
+        fi
+        echo "components=${components}" >> $GITHUB_OUTPUT
+        echo "platforms=${platforms}" >> $GITHUB_OUTPUT
+
   perform-version:
     runs-on: ubuntu-latest
     outputs:
@@ -48,8 +82,12 @@ jobs:
 
   docker-build:
        uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
-       needs: perform-version
+       needs: [perform-version, load-docker-build-components]
        with:
          ref: ${{ github.event.ref }}
          dry-run: ${{ inputs.dry-run }}
          tags: ${{ needs.perform-version.outputs.tags }}
+         download-artifact: false
+         component: ${{ needs.load-docker-build-components.outputs.component }}
+         platforms: ${{ needs.load-docker-build-components.outputs.platforms }}
+
