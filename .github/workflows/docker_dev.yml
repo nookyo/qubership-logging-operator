@@ -27,7 +27,7 @@ jobs:
       - name: Load Docker Configuration
         id: load_component
         run: |
-          verify=$(cat "$GITHUB_WORKSPACE/.github/docker-dev-config.json" | jq '
+          verify=$(cat "$GITHUB_WORKSPACE/.github/dev-docker-config.json" | jq '
           def verify_structure:
           .components as $components
           | .platforms as $platforms
@@ -38,12 +38,12 @@ jobs:
           | if . then true else false end
           ')
           if [ ${verify} == 'true' ]; then
-            echo "✅ $GITHUB_WORKSPACE/.github/docker-dev-config.json file is valid"
-            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/docker-dev-config.json")
-            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/docker-dev-config.json")
+            echo "✅ $GITHUB_WORKSPACE/.github/dev-docker-onfig.json file is valid"
+            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/dev-docker-config.json")
+            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/dev-docker-config.json")
           else
-            echo "❗ $GITHUB_WORKSPACE/.github/docker-dev-config.json file is invalid"
-            echo "❗ $GITHUB_WORKSPACE/.github/docker-dev-config.json file is invalid" >> $GITHUB_STEP_SUMMARY
+            echo "❗ $GITHUB_WORKSPACE/.github/dev-docker-config.json file is invalid"
+            echo "❗ $GITHUB_WORKSPACE/.github/dev-docker-config.json file is invalid" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           echo "components=${components}" >> $GITHUB_OUTPUT
@@ -62,7 +62,7 @@ jobs:
         uses: netcracker/qubership-workflow-hub/actions/metadata-action@main
         id: metadata
         with:
-          configuration-path: .github/metadata-config.yml
+          configuration-path: .github/dev-metadata-config.yml
           short-sha: 11
 
       - name: Echo metadata
