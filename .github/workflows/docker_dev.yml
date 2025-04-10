@@ -3,20 +3,11 @@ run-name: "Dev build repository: ${{ github.ref_name }} #${{ github.run_number }
 on:
   workflow_dispatch:
     inputs:
-      artifact-name:
-        description: 'Artifact name'
-        required: false
-        default: ''
       tags:
         required: false
         type: string
         default: ''
         description: 'Tags'
-      java-version:
-        required: false
-        type: string
-        default: "21"
-        description: 'Java version (e.g., 21)'
       dry-run:
         required: false
         type: boolean
@@ -60,6 +51,5 @@ jobs:
        needs: perform-version
        with:
          ref: ${{ github.event.ref }}
-         artifact-id: ${{ github.event.inputs.artifact-name || github.event.repository.name }}
          dry-run: ${{ inputs.dry-run }}
          tags: ${{ needs.perform-version.outputs.tags }}
