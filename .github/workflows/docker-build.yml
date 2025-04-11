@@ -13,7 +13,6 @@ on:
         type: boolean
         default: false
         description: 'Dry run'
-
 jobs:
   load_config:
     name: "Load Docker Configuration"
@@ -84,7 +83,6 @@ jobs:
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "tags: ${TAGS}" >> $GITHUB_STEP_SUMMARY
           echo "github.head_ref = ${{ github.head_ref }}"
-
   build:
     name: "Build Docker Images"
     needs: [load_config, perform-version]
@@ -100,7 +98,7 @@ jobs:
           ref: ${{ github.ref }}
           artifact-id: my-artifact
           dry-run: ${{ inputs.dry-run }}
-          download-artifact: "false"
+          download-artifact: false
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load_config.outputs.platforms }}
           tags: ${{ needs.perform-version.outputs.tags }}
