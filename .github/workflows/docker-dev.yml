@@ -87,7 +87,7 @@ jobs:
           fi
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "tags: ${TAGS}" >> $GITHUB_STEP_SUMMARY
-          echo "github.head_ref : ${{ github.head_ref }}"
+          echo "github.head_ref = ${{ github.head_ref }}"
 
   docker-build:
     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
