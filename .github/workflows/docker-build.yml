@@ -32,7 +32,7 @@ jobs:
         id: load_component
         shell: bash
         run: |
-          verify=$(cat "$GITHUB_WORKSPACE/.github/docker-release-config.json" | jq '
+          verify=$(cat "$GITHUB_WORKSPACE/.github/docker-dev-config.json" | jq '
             def verify_structure:
               .components as $components
               | .platforms as $platforms
@@ -43,12 +43,12 @@ jobs:
             | if . then true else false end
           ')
           if [ "${verify}" == "true" ]; then
-            echo "✅ $GITHUB_WORKSPACE/.github/docker-release-config.json file is valid"
-            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/docker-release-config.json")
-            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/docker-release-config.json")
+            echo "✅ $GITHUB_WORKSPACE/.github/docker-dev-config.json file is valid"
+            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/docker-dev-config.json")
+            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/docker-dev-config.json")
           else
-            echo "❗ $GITHUB_WORKSPACE/.github/docker-release-config.json file is invalid"
-            echo "❗ $GITHUB_WORKSPACE/.github/docker-release-config.json file is invalid" >> $GITHUB_STEP_SUMMARY
+            echo "❗ $GITHUB_WORKSPACE/.github/docker-dev-config.json file is invalid"
+            echo "❗ $GITHUB_WORKSPACE/.github/docker-dev-config.json file is invalid" >> $GITHUB_STEP_SUMMARY
             exit 1
           fi
           echo "components=${components}" >> "$GITHUB_OUTPUT"
