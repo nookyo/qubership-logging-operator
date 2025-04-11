@@ -57,6 +57,7 @@ jobs:
 
   perform-version:
     runs-on: ubuntu-latest
+    needs: [load-docker-build-components]
     outputs:
       metadata: "${{ steps.metadata.outputs.result }}"
       tags: "${{ steps.prepare_tags.outputs.tags }}"
@@ -89,7 +90,7 @@ jobs:
 
   docker-build:
     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
-    needs: [perform-version, load-docker-build-components]
+    needs: [perform-version]
     with:
       ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       dry-run: ${{ inputs.dry-run }}
