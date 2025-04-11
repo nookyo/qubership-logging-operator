@@ -45,12 +45,11 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
-      # Convert the loaded components JSON string into a matrix.
       matrix:
         component: ${{ fromJson(needs.load_config.outputs.components) }}
     steps:
       - name: Docker Build and Publish
-        uses: ./.github/actions/docker-build-action
+        uses: nookyo/qubership-workflow-hub/actions/docker-build
         with:
           ref: main
           artifact-id: my-artifact
