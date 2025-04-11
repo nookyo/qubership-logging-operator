@@ -87,13 +87,14 @@ jobs:
           fi
           echo "tags=${TAGS}" >> $GITHUB_OUTPUT
           echo "tags: ${TAGS}" >> $GITHUB_STEP_SUMMARY
+          echo "github.head_ref : ${github.head_ref}"
 
   docker-build:
     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
     needs: [perform-version]
     with:
       ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-      dry-run: ${{ inputs.dry-run }}
+      dry-run: 'false'
       tags: ${{ needs.perform-version.outputs.tags }}
       download-artifact: false
       component: ${{ needs.load-docker-build-components.outputs.component }}
