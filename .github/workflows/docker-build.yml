@@ -64,7 +64,7 @@ jobs:
         component: ${{ fromJson(needs.load_config.outputs.components) }}
     steps:
       - name: Docker Build and Publish
-        uses: nookyo/qubership-workflow-hub/actions/docker-build
+        uses: nookyo/qubership-workflow-hub/actions/docker-build@main
         with:
           ref: ${{ github.ref }}
           artifact-id: my-artifact
