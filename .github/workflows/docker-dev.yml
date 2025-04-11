@@ -94,7 +94,7 @@ jobs:
     needs: [perform-version]
     with:
       ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-      dry-run: 'false'
+      dry-run: true
       tags: ${{ needs.perform-version.outputs.tags }}
       download-artifact: false
       component: ${{ needs.load-docker-build-components.outputs.component }}
