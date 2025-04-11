@@ -87,7 +87,7 @@ jobs:
     uses: nookyo/qubership-workflow-hub/.github/workflows/docker-publish.yml@main
     needs: [perform-version, load-docker-build-components]
     with:
-      ref: ${{ github.event.ref }}
+      ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
       dry-run: ${{ inputs.dry-run }}
       tags: ${{ needs.perform-version.outputs.tags }}
       download-artifact: false
