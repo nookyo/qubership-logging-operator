@@ -1,9 +1,7 @@
 name: Build Docker Images with Matrix Strategy
 
 on:
-  push:
-    branches:
-      - main
+  workflow_dispatch:
 
 jobs:
   build:
@@ -20,7 +18,7 @@ jobs:
           ref: main
           artifact-id: my-artifact
           context: 'git'
-          dry-run: "false"
+          dry-run: "true"
           download-artifact: "false"
           component: ${{ matrix.component }}
           platforms: "linux/amd64,linux/arm64"
