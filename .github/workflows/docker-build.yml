@@ -100,7 +100,6 @@ jobs:
         uses: nookyo/qubership-workflow-hub/actions/docker-build@main
         with:
           ref: ${{ github.ref }}
-          artifact-id: my-artifact
           dry-run: ${{ inputs.dry-run }}
           download-artifact: false
           component: ${{ toJson(matrix.component) }}
