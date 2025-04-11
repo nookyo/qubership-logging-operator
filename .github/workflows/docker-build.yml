@@ -63,7 +63,7 @@ jobs:
       matrix:
         component: ${{ fromJson(needs.load_config.outputs.components) }}
     steps:
-      - name: Docker Build and Publish
+      - name: Docker
         uses: nookyo/qubership-workflow-hub/actions/docker-build@main
         with:
           ref: ${{ github.ref }}
