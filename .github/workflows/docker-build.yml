@@ -87,7 +87,7 @@ jobs:
 
   build:
     name: "Build Docker Images"
-    needs: load_config
+    needs: [load_config, perform-version]
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -99,11 +99,10 @@ jobs:
         with:
           ref: ${{ github.ref }}
           artifact-id: my-artifact
-          context: "git"
           dry-run: ${{ inputs.dry-run }}
           download-artifact: "false"
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load_config.outputs.platforms }}
-          tags: "latest, v1.0.0"
+          tags: ${{ needs.perform-version.outputs.tags }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
