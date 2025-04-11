@@ -1,11 +1,6 @@
 {
     "components" : [
       {
-          "name": "qubership-logging-operator",
-          "file": "./Dockerfile",
-          "context": "."
-      },
-      {
           "name": "qubership-logging-integration-tests",
           "file": "integration-tests/Dockerfile ",
           "context": "integration-tests"
