@@ -2,6 +2,21 @@ name: Build Docker Images with Matrix Strategy
 
 on:
   workflow_dispatch:
+    inputs:
+      tags:
+        required: false
+        type: string
+        default: ''
+        description: 'Tags'
+      dry-run:
+        required: false
+        type: boolean
+        default: false
+        description: 'Dry run'
+      path-to-chart:
+        description: 'Path to chart'
+        required: true
+        default: './charts/qubership-logging-operator/Chart.yaml'
 
 jobs:
   load_config:
@@ -51,12 +66,11 @@ jobs:
       - name: Docker Build and Publish
         uses: nookyo/qubership-workflow-hub/actions/docker-build
         with:
-          ref: main
+          ref: ${{ github.ref }}
           artifact-id: my-artifact
-          context: .
-          dry-run: "false"
+          context: "git"
+          dry-run: ${{ inputs.dry-run }}
           download-artifact: "false"
-          # Convert the matrix component (an object) to JSON string.
           component: ${{ toJson(matrix.component) }}
           platforms: ${{ needs.load_config.outputs.platforms }}
           tags: "latest, v1.0.0"
