@@ -1,6 +1,8 @@
 name: Dev Build
 run-name: "Dev build repository: ${{ github.ref_name }} #${{ github.run_number }}"
 on:
+  pull_request:
+    types: [opened, synchronize, reopened]
   workflow_dispatch:
     inputs:
       tags:
