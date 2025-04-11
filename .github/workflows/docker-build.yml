@@ -4,24 +4,60 @@ on:
   workflow_dispatch:
 
 jobs:
+  load_config:
+    name: "Load Docker Configuration"
+    runs-on: ubuntu-latest
+    outputs:
+      components: ${{ steps.load_component.outputs.components }}
+      platforms: ${{ steps.load_component.outputs.platforms }}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+      - name: Load Docker Configuration
+        id: load_component
+        shell: bash
+        run: |
+          verify=$(cat "$GITHUB_WORKSPACE/.github/docker-release-config.json" | jq '
+            def verify_structure:
+              .components as $components
+              | .platforms as $platforms
+              | ($components | type == "array")
+              and (all($components[]; has("name") and has("file") and has("context")))
+              and ($platforms | type == "string");
+            verify_structure
+            | if . then true else false end
+          ')
+          if [ "${verify}" == "true" ]; then
+            echo "✅ $GITHUB_WORKSPACE/.github/docker-release-config.json file is valid"
+            components=$(jq -c ".components" "$GITHUB_WORKSPACE/.github/docker-release-config.json")
+            platforms=$(jq -c ".platforms" "$GITHUB_WORKSPACE/.github/docker-release-config.json")
+          else
+            echo "❗ $GITHUB_WORKSPACE/.github/docker-release-config.json file is invalid"
+            echo "❗ $GITHUB_WORKSPACE/.github/docker-release-config.json file is invalid" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+          echo "components=${components}" >> "$GITHUB_OUTPUT"
+          echo "platforms=${platforms}" >> "$GITHUB_OUTPUT"
+
   build:
+    name: "Build Docker Images"
+    needs: load_config
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
+      # Convert the loaded components JSON string into a matrix.
       matrix:
-        component:
-          - '{"name": "component1", "file": "./Dockerfile", "context": "."}'
+        component: ${{ fromJson(needs.load_config.outputs.components) }}
     steps:
       - name: Docker Build and Publish
-        uses:  nookyo/qubership-workflow-hub/actions/docker-build@main
+        uses: ./.github/actions/docker-build-action
         with:
           ref: main
           artifact-id: my-artifact
-          context: 'git'
-          dry-run: "true"
+          context: .
+          dry-run: "false"
           download-artifact: "false"
-          component: ${{ matrix.component }}
-          platforms: "linux/amd64,linux/arm64"
+          # Convert the matrix component (an object) to JSON string.
+          component: ${{ toJson(matrix.component) }}
+          platforms: ${{ needs.load_config.outputs.platforms }}
           tags: "latest, v1.0.0"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
