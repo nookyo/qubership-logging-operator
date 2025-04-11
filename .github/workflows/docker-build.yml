@@ -1,0 +1,27 @@
+name: Build Docker Images with Matrix Strategy
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        component:
+          - '{"name": "component1", "file": "./Dockerfile", "context": "."}'
+    steps:
+      - name: Docker Build and Publish
+        uses:  netcracker/qubership-workflow-hub/actions/docker-build@main
+        with:
+          ref: main
+          artifact-id: my-artifact
+          context: 'git'
+          dry-run: "false"
+          download-artifact: "false"
+          component: ${{ matrix.component }}
+          platforms: "linux/amd64,linux/arm64"
+          tags: "latest, v1.0.0"
