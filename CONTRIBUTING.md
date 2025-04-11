@@ -1,4 +1,4 @@
-# Contribution Guide
+# Contribution Guide ###
 
 We'd love to accept patches and contributions to this project.
 Please, follow these guidelines to make the contribution process easy and effective for everyone involved.
