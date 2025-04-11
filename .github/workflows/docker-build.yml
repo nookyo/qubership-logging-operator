@@ -13,7 +13,7 @@ jobs:
           - '{"name": "component1", "file": "./Dockerfile", "context": "."}'
     steps:
       - name: Docker Build and Publish
-        uses:  netcracker/qubership-workflow-hub/actions/docker-build@main
+        uses:  nookyo/qubership-workflow-hub/actions/docker-build@main
         with:
           ref: main
           artifact-id: my-artifact
